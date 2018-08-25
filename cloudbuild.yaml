@@ -3,13 +3,13 @@ steps:
 #
 # Copy from src to dist
 #
-- name: 'python3'
+- name: 'python:3'
   args: ['./copy.py', '$TAG_NAME']
 
 #
 # Test kustomize build
 #
-- name: 'python3'
+- name: 'python:3'
   args: ['./test.py', '$TAG_NAME']
 
 #
