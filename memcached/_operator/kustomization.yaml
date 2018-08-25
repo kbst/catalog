@@ -1,0 +1,14 @@
+bases:
+- ../_common/
+
+resources:
+- custom_resource_definition.yaml
+- service_account.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+
+namespace: kubestack
+
+commonLabels:
+  operator: memcached.operator.kubestack.com

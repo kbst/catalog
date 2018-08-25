@@ -1,0 +1,21 @@
+steps:
+
+#
+# Copy from src to dist
+#
+- name: 'python3'
+  args: ['./copy.py', '$TAG_NAME']
+
+#
+# Test kustomize build
+#
+- name: 'python3'
+  args: ['./test.py', '$TAG_NAME']
+
+#
+# Copy from dist to bucket
+#
+artifacts:
+  objects:
+    location: 'gs://$_CATALOG_BUCKET_NAME/$TAG_NAME'
+    paths: ['_dist/**']

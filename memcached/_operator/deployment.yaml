@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: memcached-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      operator: memcached.operator.kubestack.com
+  template:
+    metadata:
+      labels:
+        heritage: kubestack.com
+        operator: memcached.operator.kubestack.com
+    spec:
+      containers:
+      - image: kubestack/memcached:v0.2.1
+        imagePullPolicy: IfNotPresent
+        name: memcached-operator
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+      serviceAccountName: memcached-operator
+      terminationGracePeriodSeconds: 30

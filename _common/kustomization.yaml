@@ -1,0 +1,5 @@
+resources:
+- namespace.yaml
+
+commonLabels:
+  heritage: kubestack.com
