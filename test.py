@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 
-from os import listdir
+from os import environ, listdir
 from os.path import isdir
 from subprocess import call
-from sys import argv, exit
+from sys import exit
 
 DISTDIR = '_dist'
 
-if len(argv) != 2:
-    exit("Usage: test.py GIT_TAG")
-
 # Get name and version
-name, version = argv[1].split('-', 1)
+name_version = environ.get('TAG_NAME', None)
+if not name_version:
+    name_version = environ.get('BRANCH_NAME', None)
+
+try:
+    name, version = name_version.split('-', 1)
+except ValueError:
+    exit(f"[ERROR] `{name_version}` not in `name-version` format")
 
 if not isdir(f'{DISTDIR}/{name}'):
-    exit("GIT_TAG arg must be in format name-version e.g. memcached-v0.0.1")
+    available_names = [n for n in listdir(DISTDIR) if not n.startswith('_')]
+    exit(f"[ERROR] name `{name}` is not in available names {available_names}")
 
 for dirname in listdir(f'{DISTDIR}/{name}/{version}'):
-    if not dirname.startswith('_'):
-        call(['kustomize', 'build', f'{DISTDIR}/{name}/{version}/{dirname}'])
+    call(['kustomize', 'build', f'{DISTDIR}/{name}/{version}/{dirname}'])

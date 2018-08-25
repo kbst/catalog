@@ -1,21 +1,38 @@
 steps:
+#
+# Build our python:3 based cloud-builder including kustomize
+#
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+   - build
+   - --build-arg
+   - KUSTOMIZE_VERSION=1.0.6
+   - -t
+   - cloud-builder-python3-kustomize
+   - .
 
 #
 # Copy from src to dist
 #
-- name: 'python:3'
-  args: ['./copy.py', '$TAG_NAME']
+- name: 'cloud-builder-python3-kustomize'
+  args: ['bash', '-c', './dist.py']
+  env:
+  - 'PYTHONUNBUFFERED=1'
+  - 'TAG_NAME=$TAG_NAME'
+  - 'BRANCH_NAME=$BRANCH_NAME'
 
 #
 # Test kustomize build
 #
-- name: 'python:3'
-  args: ['./test.py', '$TAG_NAME']
+- name: 'cloud-builder-python3-kustomize'
+  args: ['bash', '-c', './test.py']
+  env:
+  - 'PYTHONUNBUFFERED=1'
+  - 'TAG_NAME=$TAG_NAME'
+  - 'BRANCH_NAME=$BRANCH_NAME'
 
 #
 # Copy from dist to bucket
 #
-artifacts:
-  objects:
-    location: 'gs://$_CATALOG_BUCKET_NAME/$TAG_NAME'
-    paths: ['_dist/**']
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['-m', 'cp', '-r', '_dist/*', 'gs://$_CATALOG_BUCKET_NAME']
