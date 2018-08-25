@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from os import mkdir, listdir
+from os import listdir
 from os.path import isdir
-from shutil import rmtree, copytree
 from subprocess import call
 from sys import argv, exit
 
@@ -14,7 +13,7 @@ if len(argv) != 2:
 # Get name and version
 name, version = argv[1].split('-', 1)
 
-if not isdir(name):
+if not isdir(f'{DISTDIR}/{name}'):
     exit("GIT_TAG arg must be in format name-version e.g. memcached-v0.0.1")
 
 for dirname in listdir(f'{DISTDIR}/{name}/{version}'):
