@@ -17,9 +17,9 @@ try:
 except ValueError:
     exit(f"[ERROR] `{name_version}` not in `name-version` format")
 
-if not isdir(f'{DISTDIR}/{name}'):
-    available_names = [n for n in listdir(DISTDIR) if not n.startswith('_')]
-    exit(f"[ERROR] name `{name}` is not in available names {available_names}")
+for dirname in listdir(f'{DISTDIR}'):
+    build_path = f'{DISTDIR}/{dirname}'
+    if not isdir(build_path):
+        continue
 
-for dirname in listdir(f'{DISTDIR}/{name}/{version}'):
-    call(['kustomize', 'build', f'{DISTDIR}/{name}/{version}/{dirname}'])
+    call(['kustomize', 'build', build_path])

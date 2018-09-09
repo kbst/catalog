@@ -34,5 +34,7 @@ steps:
 #
 # Copy from dist to bucket
 #
-- name: 'gcr.io/cloud-builders/gsutil'
-  args: ['-m', 'cp', '-r', '_dist/*', 'gs://$_CATALOG_BUCKET_NAME']
+artifacts:
+  objects:
+    location: 'gs://$_CATALOG_BUCKET_NAME'
+    paths: ['_dist/*.txz']

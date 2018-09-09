@@ -4,6 +4,8 @@ from os import environ, listdir, mkdir
 from os.path import isdir
 from shutil import rmtree, copytree
 from sys import exit
+import lzma
+import tarfile
 
 SRCDIR = 'src'
 DISTDIR = '_dist'
@@ -29,4 +31,15 @@ if isdir(DISTDIR):
 mkdir(DISTDIR)
 
 # Copy {name} and _common
-copytree(f'{SRCDIR}/{name}', f'{DISTDIR}/{name}/{version}')
+variants = [n for n in listdir(f'{SRCDIR}/{name}') if not n.startswith('_')]
+
+for variant in variants:
+    variant_src = f'{SRCDIR}/{name}/{variant}'
+    variant_dist = f'{DISTDIR}/{name}-{version}-{variant}'
+    archive_name = f'{variant_dist}.txz'
+
+    copytree(variant_src, variant_dist)
+
+    with lzma.open(archive_name, mode='w') as xz_file:
+        with tarfile.open(mode='w', fileobj=xz_file) as txz_file:
+            txz_file.add(f'{variant_dist}/', arcname='')
