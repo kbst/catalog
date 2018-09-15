@@ -8,7 +8,6 @@ spec:
     spec:
       containers:
       - image: kubestack/mongodb:latest
-        imagePullPolicy: Always
         name: mongodb-operator
         resources:
           limits:

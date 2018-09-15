@@ -21,6 +21,5 @@ spec:
         - name: WATCHED_NAMESPACE
           value: '*'
         image: registry.opensource.zalan.do/acid/postgres-operator:4c8dfd7
-        imagePullPolicy: IfNotPresent
         name: postgres-operator
       serviceAccountName: postgres-operator

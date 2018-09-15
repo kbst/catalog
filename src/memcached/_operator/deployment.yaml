@@ -15,7 +15,6 @@ spec:
     spec:
       containers:
       - image: kubestack/memcached:v0.2.1
-        imagePullPolicy: IfNotPresent
         name: memcached-operator
         resources:
           limits:
@@ -25,4 +24,3 @@ spec:
             cpu: 100m
             memory: 50Mi
       serviceAccountName: memcached-operator
-      terminationGracePeriodSeconds: 30
