@@ -5,7 +5,9 @@ resources:
 - cluster_role_binding.yaml
 - deployment.yaml
 
-namespace: kubestack
-
 commonLabels:
-  operator: memcached.operator.kubestack.com
+  app: memcached-operator
+  operator: memcached
+
+commonAnnotations:
+  heritage: kubestack.com/catalog/memcached

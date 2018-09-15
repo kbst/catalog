@@ -1,18 +1,10 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    name: etcd-operator
   name: etcd-operator
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      name: etcd-operator
   template:
-    metadata:
-      labels:
-        name: etcd-operator
     spec:
       containers:
       - command:
@@ -30,6 +22,5 @@ spec:
               apiVersion: v1
               fieldPath: metadata.name
         image: quay.io/coreos/etcd-operator:v0.9.2
-        imagePullPolicy: IfNotPresent
         name: etcd-operator
       serviceAccountName: etcd-operator
