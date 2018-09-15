@@ -9,7 +9,6 @@ import tarfile
 
 SRCDIR = 'src'
 DISTDIR = '_dist'
-DESIRED_FORMAT = 'name-version e.g. memcached-v0.0.1'
 
 # Get name and version
 name_version = environ.get('TAG_NAME', None)
