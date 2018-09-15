@@ -8,4 +8,4 @@ resources:
 namespace: kubestack
 
 commonLabels:
-  operator: memcached.operator.kubestack.com
+  operator: elasticsearch.operator.kubestack.com
