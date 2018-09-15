@@ -9,8 +9,6 @@ resources:
 - cluster_role_binding_prometheus.yaml
 - deployment.yaml
 
-namespace: kubestack
-
 commonLabels:
   app: prometheus-operator
   operator: prometheus

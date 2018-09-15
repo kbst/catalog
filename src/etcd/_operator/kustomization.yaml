@@ -5,8 +5,6 @@ resources:
 - cluster_role_binding.yaml
 - deployment.yaml
 
-namespace: kubestack
-
 commonLabels:
   app: etcd-operator
   operator: etcd

@@ -6,8 +6,6 @@ resources:
 - configmap.yaml
 - deployment.yaml
 
-namespace: kubestack
-
 commonLabels:
   app: postgresql-operator
   operator: postgresql
