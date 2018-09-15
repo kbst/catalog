@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: postgres-operator
+  name: postgres-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: postgres-operator
+  template:
+    metadata:
+      labels:
+        name: postgres-operator
+    spec:
+      containers:
+      - env:
+        - name: CONFIG_MAP_NAME
+          value: postgres-operator
+        - name: WATCHED_NAMESPACE
+          value: '*'
+        image: registry.opensource.zalan.do/acid/postgres-operator:4c8dfd7
+        imagePullPolicy: IfNotPresent
+        name: postgres-operator
+      serviceAccountName: postgres-operator
