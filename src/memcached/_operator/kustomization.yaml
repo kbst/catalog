@@ -8,4 +8,8 @@ resources:
 namespace: kubestack
 
 commonLabels:
-  operator: memcached.operator.kubestack.com
+  app: memcached-operator
+  operator: memcached
+
+commonAnnotations:
+  heritage: kubestack.com/catalog/memcached

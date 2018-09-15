@@ -12,4 +12,8 @@ resources:
 namespace: kubestack
 
 commonLabels:
-  operator: prometheus.operator.kubestack.com
+  app: prometheus-operator
+  operator: prometheus
+
+commonAnnotations:
+  heritage: kubestack.com/catalog/prometheus

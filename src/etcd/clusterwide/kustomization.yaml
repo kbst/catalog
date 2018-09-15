@@ -1,2 +1,5 @@
 bases:
 - _operator
+
+commonAnnotations:
+  kubestack-variant: clusterwide

@@ -8,4 +8,8 @@ resources:
 namespace: kubestack
 
 commonLabels:
-  operator: etcd.operator.kubestack.com
+  app: etcd-operator
+  operator: etcd
+
+commonAnnotations:
+  heritage: kubestack.com/catalog/etcd

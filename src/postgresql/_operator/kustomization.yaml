@@ -9,4 +9,8 @@ resources:
 namespace: kubestack
 
 commonLabels:
-  operator: postgresql.operator.kubestack.com
+  app: postgresql-operator
+  operator: postgresql
+
+commonAnnotations:
+  heritage: kubestack.com/catalog/postgresql
