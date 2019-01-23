@@ -20,6 +20,7 @@ steps:
   - 'PYTHONUNBUFFERED=1'
   - 'TAG_NAME=$TAG_NAME'
   - 'BRANCH_NAME=$BRANCH_NAME'
+  - 'SHORT_SHA=$SHORT_SHA'
 
 #
 # Test kustomize build
@@ -30,6 +31,7 @@ steps:
   - 'PYTHONUNBUFFERED=1'
   - 'TAG_NAME=$TAG_NAME'
   - 'BRANCH_NAME=$BRANCH_NAME'
+  - 'SHORT_SHA=$SHORT_SHA'
 
 #
 # Copy from dist to bucket
@@ -37,4 +39,4 @@ steps:
 artifacts:
   objects:
     location: 'gs://$_CATALOG_BUCKET_NAME'
-    paths: ['_dist/*.txz']
+    paths: ['_dist/*.zip']
