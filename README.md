@@ -5,12 +5,12 @@ the [Kubestack Kubernetes operators catalog](https://www.kubestack.com).
 
 ## Development Workflow
 
-1. Work in a branch named `name-version` e.g. `memcached-v0.0.1`
+1. Work in a feature branch
 1. Push your branch to trigger CI/CD or install `cloud-build-local` using e.g. `gcloud components install cloud-build-local` and run:
 
     ```
     cloud-build-local --config=cloudbuild.yaml \
-      --substitutions=_CATALOG_BUCKET_NAME=,TAG_NAME=,BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD) \
+      --substitutions=_CATALOG_BUCKET_NAME=,TAG_NAME=,BRANCH_NAME=$(git name-rev --name-only HEAD),SHORT_SHA=$(git rev-parse --short=7 HEAD) \
       --dryrun=false \
       --write-workspace=_build \
       .
