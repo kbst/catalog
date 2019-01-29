@@ -2,3 +2,6 @@ namespace: ingress-nginx
 
 resources:
 - mandatory.yaml
+
+patches:
+- patch-replicas.yaml
