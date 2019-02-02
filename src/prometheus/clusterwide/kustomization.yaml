@@ -1,7 +1,0 @@
-bases:
-- _operator
-
-namespace: kubestack
-
-commonAnnotations:
-  kubestack-variant: clusterwide

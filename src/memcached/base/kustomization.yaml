@@ -1,0 +1,18 @@
+resources:
+- namespace.yaml
+- custom_resource_definition.yaml
+- service_account.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+
+namespace: operator-memcached
+
+commonLabels:
+    app.kubernetes.io/name: memcached
+    app.kubernetes.io/version: "v0.2.1"
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: kubestack
+
+commonAnnotations:
+    catalog.kubestack.com/heritage: kubestack.com/catalog/memcached
