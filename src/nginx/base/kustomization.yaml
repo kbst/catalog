@@ -8,7 +8,7 @@ patches:
 
 commonLabels:
     app.kubernetes.io/name: nginx
-    app.kubernetes.io/version: "0.21.0"
+    app.kubernetes.io/version: "0.22.0"
     app.kubernetes.io/component: ingress-controller
     app.kubernetes.io/managed-by: kubestack
 
