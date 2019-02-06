@@ -15,3 +15,6 @@ commonLabels:
 commonAnnotations:
     catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
     catalog.kubestack.com/variant: clusterwide
+
+patches:
+- patch-deployment-sysctl-namespace.yaml
