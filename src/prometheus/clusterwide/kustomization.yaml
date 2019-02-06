@@ -1,20 +1,12 @@
 resources:
 - namespace.yaml
-- custom_resource_definition_prometheuses.yaml
-- custom_resource_definition_servicemonitors.yaml
-- service_account_operator.yaml
-- service_account_prometheus.yaml
-- cluster_role_operator.yaml
-- cluster_role_binding_operator.yaml
-- cluster_role_prometheus.yaml
-- cluster_role_binding_prometheus.yaml
-- deployment.yaml
+- bundle.yaml
 
 namespace: operator-prometheus
 
 commonLabels:
     app.kubernetes.io/name: prometheus
-    app.kubernetes.io/version: "v0.19.0"
+    app.kubernetes.io/version: "v0.28.0"
     app.kubernetes.io/component: operator
     app.kubernetes.io/managed-by: kubestack
 
