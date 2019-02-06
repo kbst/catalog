@@ -1,26 +1,27 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: etcd-operator
 spec:
   replicas: 1
   template:
+    metadata:
+      labels:
+        name: etcd-operator
     spec:
       containers:
-      - command:
+      - name: etcd-operator
+        image: quay.io/coreos/etcd-operator:v0.9.3
+        command:
         - etcd-operator
         - -cluster-wide
         env:
         - name: MY_POD_NAMESPACE
           valueFrom:
             fieldRef:
-              apiVersion: v1
               fieldPath: metadata.namespace
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
-              apiVersion: v1
               fieldPath: metadata.name
-        image: quay.io/coreos/etcd-operator:v0.9.3
-        name: etcd-operator
       serviceAccountName: etcd-operator
