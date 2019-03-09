@@ -1,5 +1,6 @@
-bases:
-- base/
+resources:
+- postgres-operator.yaml
+- configmap.yaml
 
 commonLabels:
     app.kubernetes.io/name: postgresql
@@ -9,13 +10,4 @@ commonLabels:
 
 commonAnnotations:
     catalog.kubestack.com/heritage: kubestack.com/catalog/postgresql
-    catalog.kubestack.com/variant: clusterwide
-
-resources:
-- namespace.yaml
-- rbac.yaml
-
-namespace: operator-postgresql
-
-patches:
-- patch-deployment-env.yaml
+    catalog.kubestack.com/variant: base

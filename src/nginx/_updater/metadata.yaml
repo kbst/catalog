@@ -1,0 +1,2 @@
+url: git@github.com:kubernetes/ingress-nginx.git
+strip_prefix: nginx-

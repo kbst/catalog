@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etcd-operator
+spec:
+  template:
+    spec:
+      containers:
+      - name: etcd-operator
+        command:
+        - etcd-operator
+        - -cluster-wide
