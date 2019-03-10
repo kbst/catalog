@@ -1,20 +1,15 @@
 bases:
 - base/
-
-resources:
-- namespace.yaml
-
-namespace: operator-elasticsearch
-
-commonLabels:
-    app.kubernetes.io/name: elasticsearch
-    app.kubernetes.io/version: "0.2.0"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
-
 commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
-    catalog.kubestack.com/variant: clusterwide
-
+  catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
+  catalog.kubestack.com/variant: clusterwide
+commonLabels:
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: elasticsearch
+  app.kubernetes.io/version: v0.3.0
+namespace: operator-elasticsearch
 patches:
 - patch-deployment-sysctl-namespace.yaml
+resources:
+- namespace.yaml
