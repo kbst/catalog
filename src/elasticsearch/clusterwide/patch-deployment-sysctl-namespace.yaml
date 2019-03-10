@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch-operator
+spec:
+  template:
+      spec:
+          containers:
+          - name: operator
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "/usr/local/bin/elasticsearch-operator"
+            - "-initDaemonsetNamespace=$NAMESPACE"
