@@ -1,21 +1,16 @@
 bases:
 - base/
-
-commonLabels:
-    app.kubernetes.io/name: postgresql
-    app.kubernetes.io/version: "4c8dfd7"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
-
 commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/postgresql
-    catalog.kubestack.com/variant: clusterwide
-
+  catalog.kubestack.com/heritage: kubestack.com/catalog/postgresql
+  catalog.kubestack.com/variant: clusterwide
+commonLabels:
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: postgresql
+  app.kubernetes.io/version: v1.1.0
+namespace: operator-postgresql
+patches:
+- patch-deployment-env.yaml
 resources:
 - namespace.yaml
 - rbac.yaml
-
-namespace: operator-postgresql
-
-patches:
-- patch-deployment-env.yaml
