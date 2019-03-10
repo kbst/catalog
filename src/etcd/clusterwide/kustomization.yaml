@@ -1,24 +1,19 @@
 bases:
 - base/
-
+commonAnnotations:
+  catalog.kubestack.com/heritage: kubestack.com/catalog/etcd
+  catalog.kubestack.com/variant: clusterwide
+commonLabels:
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: etcd
+  app.kubernetes.io/version: v0.9.4
+namespace: operator-etcd
+patches:
+- patch_deployment_command.yaml
+- patch_deployment_sa_name.yaml
 resources:
 - cluster_role_binding.yaml
 - cluster_role.yaml
 - namespace.yaml
 - service_account.yaml
-
-namespace: operator-etcd
-
-commonLabels:
-    app.kubernetes.io/name: etcd
-    app.kubernetes.io/version: "v0.9.3"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
-
-commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/etcd
-    catalog.kubestack.com/variant: clusterwide
-
-patches:
-- patch_deployment_command.yaml
-- patch_deployment_sa_name.yaml

@@ -1,12 +1,10 @@
+commonAnnotations:
+  catalog.kubestack.com/heritage: kubestack.com/catalog/etcd
+  catalog.kubestack.com/variant: base
+commonLabels:
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: etcd
+  app.kubernetes.io/version: v0.9.4
 resources:
 - deployment.yaml
-
-commonLabels:
-    app.kubernetes.io/name: etcd
-    app.kubernetes.io/version: "v0.9.3"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
-
-commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/etcd
-    catalog.kubestack.com/variant: base
