@@ -14,3 +14,4 @@ commonLabels:
 
 commonAnnotations:
     catalog.kubestack.com/heritage: kubestack.com/catalog/nginx
+    catalog.kubestack.com/variant: base

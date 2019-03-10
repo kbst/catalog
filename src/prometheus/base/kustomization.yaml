@@ -1,10 +1,5 @@
-bases:
-- base/
-
 resources:
-- namespace.yaml
-
-namespace: operator-prometheus
+- bundle.yaml
 
 commonLabels:
     app.kubernetes.io/name: prometheus
@@ -14,4 +9,4 @@ commonLabels:
 
 commonAnnotations:
     catalog.kubestack.com/heritage: kubestack.com/catalog/prometheus
-    catalog.kubestack.com/variant: clusterwide
+    catalog.kubestack.com/variant: base

@@ -1,0 +1,12 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: postgres-operator
+spec:
+  template:
+    spec:
+      containers:
+      - name: postgres-operator
+        env:
+        - name: WATCHED_NAMESPACE
+          value: '*'

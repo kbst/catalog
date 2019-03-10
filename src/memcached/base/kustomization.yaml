@@ -1,13 +1,6 @@
-bases:
-- base/
-
 resources:
-- namespace.yaml
-- service_account.yaml
-- cluster_role.yaml
-- cluster_role_binding.yaml
-
-namespace: operator-memcached
+- custom_resource_definition.yaml
+- deployment.yaml
 
 commonLabels:
     app.kubernetes.io/name: memcached
@@ -17,4 +10,4 @@ commonLabels:
 
 commonAnnotations:
     catalog.kubestack.com/heritage: kubestack.com/catalog/memcached
-    catalog.kubestack.com/variant: clusterwide
+    catalog.kubestack.com/variant: base
