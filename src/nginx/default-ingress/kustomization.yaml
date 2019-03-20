@@ -10,3 +10,9 @@ commonLabels:
   app.kubernetes.io/version: v0.23.0
   kubestack.com/ingress-default: "true"
 namespace: ingress-kbst-default
+patchesJson6902:
+- target:
+   version: v1
+   kind: Namespace
+   name: ingress-nginx
+  path: patch-namespace.yaml
