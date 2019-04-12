@@ -1,5 +1,5 @@
 bases:
-- base/
+- ../base/
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/postgresql
   catalog.kubestack.com/variant: clusterwide

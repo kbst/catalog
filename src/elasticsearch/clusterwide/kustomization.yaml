@@ -1,5 +1,5 @@
 bases:
-- base/
+- ../base/
 
 resources:
 - namespace.yaml
