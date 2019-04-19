@@ -11,3 +11,4 @@ commonLabels:
 namespace: operator-prometheus
 resources:
 - namespace.yaml
+- instance-cluster-role.yaml
