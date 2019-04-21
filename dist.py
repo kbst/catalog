@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 
 from os import environ, listdir, mkdir
-from os.path import isdir
-from shutil import copytree, make_archive, rmtree
+from os.path import isdir, join
+from shutil import copytree, ignore_patterns, make_archive, rmtree
 from sys import exit
 
 
-def create_variant_archives(name, version):
-    variants = [n for n in listdir(f'{SRCDIR}/{name}')
-                if not n.startswith('_')]
+def create_archive(name, version):
+    archive_src = join(SRCDIR, name)
+    archive_dist = join(DISTDIR, name)
+    archive = join(DISTDIR, f'{name}-{version}')
 
-    for variant in variants:
-        variant_src = f'{SRCDIR}/{name}/{variant}'
-        variant_name = f'{name}-{version}-{variant}'
-        variant_dist = f'{DISTDIR}/{variant_name}'
+    copytree(archive_src, archive_dist, ignore=ignore_patterns('_*'))
 
-        copytree(variant_src, variant_dist)
-
-        make_archive(variant_dist, 'zip', f'{DISTDIR}', variant_name)
+    make_archive(archive, 'zip', DISTDIR, name)
 
 
 SRCDIR = 'src'
@@ -45,7 +41,7 @@ if release_version:
     if not isdir(f'{SRCDIR}/{name}'):
         exit(f"[ERROR] `{name}` is not in available names {available_names}")
 
-    create_variant_archives(name, version)
+    create_archive(name, version)
 else:
     # We're not making a release, build all entries
     branch = environ.get('BRANCH_NAME', None)
@@ -59,4 +55,4 @@ else:
     version = f'{branch}-{hash}'
 
     for name in available_names:
-        create_variant_archives(name, version)
+        create_archive(name, version)

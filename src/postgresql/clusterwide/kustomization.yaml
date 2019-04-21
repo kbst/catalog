@@ -1,5 +1,5 @@
 bases:
-- base/
+- ../base/
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/postgresql
   catalog.kubestack.com/variant: clusterwide
@@ -9,8 +9,10 @@ commonLabels:
   app.kubernetes.io/name: postgresql
   app.kubernetes.io/version: v1.1.0
 namespace: operator-postgresql
-patches:
+patchesStrategicMerge:
 - patch-deployment-env.yaml
 resources:
 - namespace.yaml
 - rbac.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

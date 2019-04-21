@@ -7,7 +7,9 @@ commonLabels:
   app.kubernetes.io/name: nginx
   app.kubernetes.io/version: v0.23.0
 namespace: ingress-nginx
-patches:
+patchesStrategicMerge:
 - patch-replicas.yaml
 resources:
 - mandatory.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

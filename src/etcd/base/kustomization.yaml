@@ -8,3 +8,5 @@ commonLabels:
   app.kubernetes.io/version: v0.9.4
 resources:
 - deployment.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
