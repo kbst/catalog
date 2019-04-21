@@ -3,11 +3,13 @@ resources:
 - deployment.yaml
 
 commonLabels:
-    app.kubernetes.io/name: mongodb
-    app.kubernetes.io/version: "latest"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: mongodb
+  app.kubernetes.io/version: latest
 
 commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/mongodb
-    catalog.kubestack.com/variant: base
+  catalog.kubestack.com/heritage: kubestack.com/catalog/mongodb
+  catalog.kubestack.com/variant: base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

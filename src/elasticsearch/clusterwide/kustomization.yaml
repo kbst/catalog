@@ -7,14 +7,16 @@ resources:
 namespace: operator-elasticsearch
 
 commonLabels:
-    app.kubernetes.io/name: elasticsearch
-    app.kubernetes.io/version: "0.2.0"
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/component: operator
+  app.kubernetes.io/managed-by: kubestack
+  app.kubernetes.io/name: elasticsearch
+  app.kubernetes.io/version: 0.2.0
 
 commonAnnotations:
-    catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
-    catalog.kubestack.com/variant: clusterwide
+  catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
+  catalog.kubestack.com/variant: clusterwide
 
-patches:
+patchesStrategicMerge:
 - patch-deployment-sysctl-namespace.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
