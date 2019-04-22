@@ -10,5 +10,4 @@ spec:
             command:
             - "/bin/sh"
             - "-c"
-            - "/usr/local/bin/elasticsearch-operator"
-            - "-initDaemonsetNamespace=$NAMESPACE"
+            - "/usr/local/bin/elasticsearch-operator -initDaemonsetNamespace=$(NAMESPACE)"
