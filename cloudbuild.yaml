@@ -6,7 +6,7 @@ steps:
   args:
    - build
    - --build-arg
-   - KUSTOMIZE_VERSION=2.0.0
+   - KUSTOMIZE_VERSION=2.0.3
    - -t
    - cloud-builder-python3-kustomize
    - .
