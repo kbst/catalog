@@ -15,7 +15,7 @@ commonLabels:
   app.kubernetes.io/name: elasticsearch
 
 commonAnnotations:
-  app.kubernetes.io/version: 0.2.0
+  app.kubernetes.io/version: 0.3.0
   catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
   catalog.kubestack.com/variant: clusterwide
 
