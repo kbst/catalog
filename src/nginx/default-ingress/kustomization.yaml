@@ -7,7 +7,7 @@ commonLabels:
   app.kubernetes.io/component: ingress-controller
   app.kubernetes.io/managed-by: kubestack
   app.kubernetes.io/name: nginx
-  app.kubernetes.io/version: v0.23.0
+  app.kubernetes.io/version: v0.24.1
   kubestack.com/ingress-default: "true"
 namespace: ingress-kbst-default
 patchesJson6902:
