@@ -1,11 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 bases:
 - ../base/
-
-resources:
-- namespace.yaml
-- service_account.yaml
-- cluster_role.yaml
-- cluster_role_binding.yaml
 
 namespace: operator-mongodb
 
@@ -13,10 +10,14 @@ commonLabels:
   app.kubernetes.io/component: operator
   app.kubernetes.io/managed-by: kubestack
   app.kubernetes.io/name: mongodb
-  app.kubernetes.io/version: latest
 
 commonAnnotations:
+  app.kubernetes.io/version: latest
   catalog.kubestack.com/heritage: kubestack.com/catalog/mongodb
   catalog.kubestack.com/variant: clusterwide
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+
+resources:
+- namespace.yaml
+- service_account.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml

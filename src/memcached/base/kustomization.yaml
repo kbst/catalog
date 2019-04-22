@@ -1,13 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/memcached
   catalog.kubestack.com/variant: base
+  app.kubernetes.io/version: v0.2.1
+
 commonLabels:
   app.kubernetes.io/component: operator
   app.kubernetes.io/managed-by: kubestack
   app.kubernetes.io/name: memcached
-  app.kubernetes.io/version: v0.2.1
+
 resources:
 - custom_resource_definition.yaml
 - deployment.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
