@@ -10,10 +10,10 @@ commonLabels:
   app.kubernetes.io/name: elasticsearch
 
 commonAnnotations:
-  app.kubernetes.io/version: 0.2.0
+  app.kubernetes.io/version: 0.3.0
   catalog.kubestack.com/heritage: kubestack.com/catalog/elasticsearch
   catalog.kubestack.com/variant: base
 
 images:
 - name: upmcenterprises/elasticsearch-operator
-  newTag: 0.2.0
+  newTag: 0.3.0
