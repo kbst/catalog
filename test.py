@@ -7,14 +7,13 @@ from subprocess import CalledProcessError, run
 DISTDIR = '_dist'
 
 failed_builds = []
-
 for entry_dir in listdir(DISTDIR):
     entry_path = join(DISTDIR, entry_dir)
     if not isdir(entry_path):
         continue
 
     for build_dir in listdir(entry_path):
-        build_path = join(DISTDIR, build_dir)
+        build_path = join(entry_path, build_dir)
         if not isdir(build_path):
             continue
 
