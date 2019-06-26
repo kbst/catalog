@@ -3,13 +3,10 @@ kind: Kustomization
 
 namespace: operator-etcd
 
-bases:
-- ../base/
-
 commonAnnotations:
+  app.kubernetes.io/version: v0.9.4
   catalog.kubestack.com/heritage: kubestack.com/catalog/etcd
   catalog.kubestack.com/variant: clusterwide
-  app.kubernetes.io/version: v0.9.4
 
 commonLabels:
   app.kubernetes.io/component: operator
@@ -21,6 +18,7 @@ patchesStrategicMerge:
 - patch_deployment_sa_name.yaml
 
 resources:
+- ../base/
 - cluster_role_binding.yaml
 - cluster_role.yaml
 - namespace.yaml
