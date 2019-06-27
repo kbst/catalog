@@ -1,6 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+bases:
+- ../base/
+
 namespace: operator-prometheus
 
 commonAnnotations:
@@ -14,6 +17,5 @@ commonLabels:
   app.kubernetes.io/name: prometheus
 
 resources:
-- ../base/
 - namespace.yaml
 - instance-cluster-role.yaml

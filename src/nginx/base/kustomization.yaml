@@ -4,9 +4,9 @@ kind: Kustomization
 namespace: ingress-nginx
 
 commonAnnotations:
-  app.kubernetes.io/version: v0.24.1
   catalog.kubestack.com/heritage: kubestack.com/catalog/nginx
   catalog.kubestack.com/variant: base
+  app.kubernetes.io/version: v0.24.1
 
 commonLabels:
   app.kubernetes.io/component: ingress-controller
