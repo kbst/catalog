@@ -8,10 +8,6 @@ commonLabels:
   app.kubernetes.io/component: operator
   app.kubernetes.io/managed-by: kubestack
   app.kubernetes.io/name: postgresql
-images:
-- name: registry.opensource.zalan.do/acid/smoke-tested-postgres-operator
-  newName: registry.opensource.zalan.do/acid/postgres-operator
-  newTag: v1.2.0
 resources:
 - postgres-operator.yaml
 - configmap.yaml
