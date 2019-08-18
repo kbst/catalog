@@ -3,18 +3,34 @@ steps:
 # Build our python:3 based cloud-builder including kustomize
 #
 - name: 'gcr.io/cloud-builders/docker'
+  id: build1
   args:
    - build
    - --build-arg
    - KUSTOMIZE_VERSION=2.0.3
    - -t
-   - cloud-builder-python3-kustomize
+   - cloud-builder-python3-kustomize:test1
+   - .
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: build2
+  waitFor:
+  - build1
+  args:
+   - build
+   - --build-arg
+   - KUSTOMIZE_VERSION=3.1.0
+   - -t
+   - cloud-builder-python3-kustomize:test2
    - .
 
 #
 # Copy from src to dist
 #
-- name: 'cloud-builder-python3-kustomize'
+- name: 'cloud-builder-python3-kustomize:2.1.0'
+  id: dist
+  waitFor:
+  - build1
   args: ['bash', '-c', './dist.py']
   env:
   - 'PYTHONUNBUFFERED=1'
@@ -25,7 +41,23 @@ steps:
 #
 # Test kustomize build
 #
-- name: 'cloud-builder-python3-kustomize'
+- name: 'cloud-builder-python3-kustomize:test1'
+  id: test1
+  waitFor:
+  - build1
+  - dist
+  args: ['bash', '-c', './test.py']
+  env:
+  - 'PYTHONUNBUFFERED=1'
+  - 'TAG_NAME=$TAG_NAME'
+  - 'BRANCH_NAME=$BRANCH_NAME'
+  - 'SHORT_SHA=$SHORT_SHA'
+
+- name: 'cloud-builder-python3-kustomize:test2'
+  id: test2
+  waitFor:
+  - build2
+  - dist
   args: ['bash', '-c', './test.py']
   env:
   - 'PYTHONUNBUFFERED=1'
