@@ -4,13 +4,8 @@ bases:
 - ../base/
 namespace: operator-prometheus
 commonAnnotations:
-  app.kubernetes.io/version: v0.31.1
   catalog.kubestack.com/heritage: kubestack.com/catalog/prometheus
   catalog.kubestack.com/variant: clusterwide
-commonLabels:
-  app.kubernetes.io/component: operator
-  app.kubernetes.io/managed-by: kubestack
-  app.kubernetes.io/name: prometheus
 resources:
 - namespace.yaml
 - instance-cluster-role.yaml
