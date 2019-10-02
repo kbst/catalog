@@ -36,12 +36,12 @@ if ref_name.startswith('refs/tags/'):
     # We're releasing a specific catalog entry
     # tag must have name-version format
 
-    release_version = ref_name.lstrip('refs/tags/')
+    release_version = ref_name.replace('refs/tags/', '')
 
     for name in available_names:
         prefix = f'{name}-'
         if release_version.startswith(prefix):
-            version = release_version.lstrip(prefix)
+            version = release_version.replace(prefix, '')
             break
 
     if not isdir(f'{SRCDIR}/{name}'):
@@ -51,7 +51,7 @@ if ref_name.startswith('refs/tags/'):
 elif ref_name.startswith('refs/heads/'):
     # We're not making a release, build all entries
 
-    branch = ref_name.lstrip('refs/heads/')
+    branch = ref_name.replace('refs/heads/', '')
 
     hash = environ.get('GIT_SHA', None)[0:7]
     if not hash:
