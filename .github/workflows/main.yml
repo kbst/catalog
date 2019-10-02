@@ -1,0 +1,58 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - "*"  # run for branches
+    tags:
+    - "*"  # run for tags
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    #
+    #
+    # Build image
+    - uses: actions/docker/cli@master
+      name: Build image
+      env:
+        DOCKER_BUILDKIT: 1
+      with:
+        args: build --build-arg KUSTOMIZE_VERSION=2.0.3 -t python3-kustomize:latest .
+
+    #
+    #
+    # Run dist.py
+    - uses: actions/docker/cli@master
+      name: Run dist.py
+      env:
+          GIT_REF: ${{ github.ref }}
+          GIT_SHA: ${{ github.sha }}
+      with:
+        args: run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './dist.py'
+
+    #
+    #
+    # Run test.py
+    - uses: actions/docker/cli@master
+      name: Run test.py
+      with:
+        args: run -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './test.py'
+
+    #
+    #
+    # Upload archive
+    - uses: actions/gcloud/auth@master
+      name: Auth
+      env:
+        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+
+    - uses: actions/gcloud/cli@master
+      name: Upload
+      with:
+        entrypoint: /builder/google-cloud-sdk/bin/gsutil
+        args: -m cp _dist/*.zip gs://dev.catalog.kubestack.com

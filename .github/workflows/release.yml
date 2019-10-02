@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    branches:
+    - "!*"  # do not run on any branches
+    tags:
+    - "*"  # only run for tags
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/gcloud/auth@master
+      name: Authenticate
+      env:
+        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+
+    #
+    #
+    # Promote archive
+    - uses: actions/gcloud/cli@master
+      name: Promote archive
+      with:
+        entrypoint: sh
+        args: |
+              -c "
+              export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+              while true
+              do
+                  /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip
+                  if [ $? -eq 0 ]
+                  then
+                      break
+                  else
+                      sleep 15
+                  fi
+              done"

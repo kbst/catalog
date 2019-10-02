@@ -1,20 +1,40 @@
 # Kubestack Catalog
 
-This repository holds the source kustomize manifests and build toolchain for
-the [Kubestack Kubernetes operators catalog](https://www.kubestack.com).
+This repository holds the kustomize source manifests and build toolchain for
+the [Kubestack catalog of Kustomize bases](https://www.kubestack.com/catalog).
 
 ## Development Workflow
 
+1. Fork this repository
 1. Work in a feature branch
-1. Push your branch to trigger CI/CD or install `cloud-build-local` using e.g. `gcloud components install cloud-build-local` and run:
+1. Validate your changes locally
+   ```
+   # Build the helper image
+   # optional `--build-arg KUSTOMIZE_VERSION=2.1.0`
+   docker build -t python3-kustomize .
 
-    ```
-    cloud-build-local --config=cloudbuild.yaml \
-      --substitutions=_CATALOG_BUCKET_NAME=,TAG_NAME=,BRANCH_NAME=$(git name-rev --name-only HEAD),SHORT_SHA=$(git rev-parse --short=7 HEAD) \
-      --dryrun=false \
-      --write-workspace=_build \
-      .
-    ```
+   # Run dist.py to generate the archives
+   docker run \
+       --rm \
+       -u `id -u`:`id -g` \
+       -v `pwd`:/workspace \
+       -w /workspace \
+       -e GIT_SHA=`git rev-parse --verify HEAD^{commit}` \
+       -e GIT_REF=refs/heads/`git rev-parse --abbrev-ref HEAD` \
+       python3-kustomize \
+       ./dist.py
+
+   # Run test.py to test your changes
+   docker run \
+       --rm \
+       -u `id -u`:`id -g` \
+       -v `pwd`:/workspace \
+       -w /workspace \
+       python3-kustomize \
+       ./test.py
+
+   ```
+1. Send a pull-request
 
 ## Making a Release
 

@@ -14,6 +14,7 @@ def create_archive(name, version):
     copytree(archive_src, archive_dist, ignore=ignore_patterns('_*'))
 
     make_archive(archive, 'zip', DISTDIR, name)
+    print(f"[INFO] created `{archive}.zip`")
 
 
 SRCDIR = 'src'
@@ -25,12 +26,17 @@ if isdir(DISTDIR):
 mkdir(DISTDIR)
 
 # Get name and version
-release_version = environ.get('TAG_NAME', None)
+ref_name = environ.get('GIT_REF', None)
+if not ref_name:
+    exit(f"[ERROR] `GIT_REF` env var not set")
+
 available_names = [n for n in listdir(SRCDIR) if not n.startswith('_')]
 
-if release_version:
+if ref_name.startswith('refs/tags/'):
     # We're releasing a specific catalog entry
     # tag must have name-version format
+
+    release_version = ref_name.lstrip('refs/tags/')
 
     for name in available_names:
         prefix = f'{name}-'
@@ -39,20 +45,21 @@ if release_version:
             break
 
     if not isdir(f'{SRCDIR}/{name}'):
-        exit(f"[ERROR] `{name}` is not in available names {available_names}")
+        exit(f"[ERROR] `{name}` is not in catalog: {available_names}")
 
     create_archive(name, version)
-else:
+elif ref_name.startswith('refs/heads/'):
     # We're not making a release, build all entries
-    branch = environ.get('BRANCH_NAME', None)
-    if not branch:
-        exit(f"[ERROR] `BRANCH_NAME` env var not set")
 
-    hash = environ.get('SHORT_SHA', None)
+    branch = ref_name.lstrip('refs/heads/')
+
+    hash = environ.get('GIT_SHA', None)[0:7]
     if not hash:
-        exit(f"[ERROR] `SHORT_SHA` env var not set")
+        exit(f"[ERROR] `GIT_SHA` env var not set")
 
     version = f'{branch}-{hash}'
 
     for name in available_names:
         create_archive(name, version)
+else:
+    exit(f"[ERROR] unexpected `REF_NAME`: {ref_name}")
