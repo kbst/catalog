@@ -17,31 +17,25 @@ jobs:
     #
     #
     # Build image
-    - uses: actions/docker/cli@master
-      name: Build image
+    - name: Build image
       env:
         DOCKER_BUILDKIT: 1
-      with:
-        args: build --build-arg KUSTOMIZE_VERSION=2.0.3 -t python3-kustomize:latest .
+      run: docker build --build-arg KUSTOMIZE_VERSION=2.0.3 -t python3-kustomize:latest .
 
     #
     #
     # Run dist.py
-    - uses: actions/docker/cli@master
-      name: Run dist.py
+    - name: Run dist.py
       env:
           GIT_REF: ${{ github.ref }}
           GIT_SHA: ${{ github.sha }}
-      with:
-        args: run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './dist.py'
+      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './dist.py'
 
     #
     #
     # Run test.py
-    - uses: actions/docker/cli@master
-      name: Run test.py
-      with:
-        args: run -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './test.py'
+    - name: Run test.py
+      run: docker run -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:latest bash -c './test.py'
 
     #
     #
