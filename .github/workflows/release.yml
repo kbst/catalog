@@ -8,8 +8,57 @@ on:
     - "*"  # only run for tags
 
 jobs:
+  test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    #
+    #
+    # Setup Kind
+    - uses: engineerd/setup-kind@v0.1.0
+
+    #
+    #
+    # Extract archive
+    - name: Extract archive
+      run: |
+            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            set +e
+            while true
+            do
+                wget https://storage.googleapis.com/dev.catalog.kubestack.com/${NAME}.zip && break
+                sleep 15
+            done
+            mkdir -p _test
+            unzip -d _test/ ${NAME}.zip
+
+    #
+    #
+    # Deploy to cluster
+    - name: Deploy
+      run: |
+            export KUBECONFIG="$(kind get kubeconfig-path)"
+            kubectl cluster-info
+
+            for entry in $(ls _test/)
+            do
+                for overlay in $(ls _test/$entry)
+                do
+                    echo && echo '### TEST APPLY ###'
+                    kubectl apply -k _test/$entry/$overlay
+
+                    echo && echo '### TEST READY ###'
+                    kubectl wait pod --for=condition=Ready --timeout=300s --all --all-namespaces
+
+                    echo && echo '### TEST DELETE ###'
+                    kubectl delete -k _test/$entry/$overlay --wait
+                done
+            done
+
   promote:
     runs-on: ubuntu-latest
+
+    needs: test-deploy
 
     steps:
     - uses: actions/gcloud/auth@master
@@ -27,13 +76,17 @@ jobs:
         args: |
               -c "
               export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+              set +e
               while true
               do
-                  /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip
-                  if [ $? -eq 0 ]
-                  then
-                      break
-                  else
-                      sleep 15
-                  fi
+                  /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
+                  sleep 15
               done"
+
+    #
+    #
+    # Check promotion
+    - name: Check promotion
+      run: |
+            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            wget https://storage.googleapis.com/catalog.kubestack.com/${NAME}.zip
