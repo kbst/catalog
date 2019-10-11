@@ -1,0 +1,5 @@
+# Ignore contents of repos directory
+*
+
+# Except this .gitignore
+!.gitignore
