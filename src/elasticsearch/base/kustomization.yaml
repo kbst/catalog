@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - controller.yaml
+- namespace.yaml
+namespace: operator-elasticsearch
 commonLabels:
   app.kubernetes.io/component: operator
   app.kubernetes.io/managed-by: kubestack

@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: elasticsearch-operator
-  namespace: operator
+  namespace: operator-elasticsearch
 spec:
   template:
       spec:
