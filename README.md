@@ -10,7 +10,7 @@ the [Kubestack catalog of Kustomize bases](https://www.kubestack.com/catalog).
 1. Validate your changes locally
    ```
    # Build the helper image
-   # optional `--build-arg KUSTOMIZE_VERSION=2.1.0`
+   # optional `--build-arg KUSTOMIZE_VERSION=3.2.3`
    docker build -t python3-kustomize .
 
    # Run dist.py to generate the archives
