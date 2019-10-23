@@ -38,6 +38,7 @@ jobs:
     - name: Deploy
       run: |
             export KUBECONFIG="$(kind get kubeconfig-path)"
+            kubectl version
             kubectl cluster-info
 
             for entry in $(ls _test/)
