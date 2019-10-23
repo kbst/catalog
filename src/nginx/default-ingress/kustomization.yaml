@@ -22,6 +22,6 @@ patchesJson6902:
   target:
     kind: Deployment
     name: nginx-ingress-controller
-    namespace: ingress-nginx
+    namespace: ingress-kbst-default
     group: apps
     version: v1
