@@ -1,0 +1,29 @@
+name: Update
+
+on:
+  push:
+    branches:
+    - "*"  # run for branches
+  schedule:
+    - cron:  "0 6 * * *"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    #
+    #
+    # Build updater
+    - name: Build updater
+      env:
+        DOCKER_BUILDKIT: 1
+      run: docker build -f updater/Dockerfile -t updater updater/
+
+    #
+    #
+    # Run updater
+    - name: Run dist.py
+      run: docker run updater
