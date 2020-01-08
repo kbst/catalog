@@ -26,4 +26,4 @@ jobs:
     #
     # Run updater
     - name: Run dist.py
-      run: docker run updater
+      run: docker run -e CATALOG_REF=updater updater
