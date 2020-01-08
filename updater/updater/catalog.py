@@ -122,8 +122,9 @@ class Catalog():
         self.repo.git.commit('-m', f'Release {release_tag}')
         try:
             self.repo.git.push('origin', self.branch_name)
-        except GitCommandError:
+        except GitCommandError as e:
             logging.error(f'push of {self.branch_name} branch rejected')
+            logging.error(f'git error: {e}')
             return
         else:
             logging.info(f'push of {self.branch_name} branch successful')
