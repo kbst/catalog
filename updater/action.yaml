@@ -1,0 +1,5 @@
+name: "Catalog Updater"
+description: "Update catalog entries with latest upstream releases."
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

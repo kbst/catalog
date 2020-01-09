@@ -16,14 +16,6 @@ jobs:
 
     #
     #
-    # Build updater
-    - name: Build updater
-      env:
-        DOCKER_BUILDKIT: 1
-      run: docker build -f updater/Dockerfile -t updater updater/
-
-    #
-    #
     # Run updater
-    - name: Run dist.py
-      run: docker run -e CATALOG_REF=updater updater
+    - name: Run updater
+      uses: kbst/catalog/updater@updater
