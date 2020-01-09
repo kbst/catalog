@@ -1,9 +1,6 @@
 name: Update
 
 on:
-  push:
-    branches:
-    - "*"  # run for branches
   schedule:
     - cron:  "0 6 * * *"
 
