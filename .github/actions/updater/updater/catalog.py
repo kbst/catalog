@@ -20,6 +20,10 @@ class Catalog():
                                         settings.CATALOG_URL,
                                         settings.CATALOG_REF)
 
+        # set git identity for commits
+        self.repo.git.config('user.name', settings.GIT_USER_NAME)
+        self.repo.git.config('user.email', settings.GIT_USER_EMAIL)
+
     def get_src_dir(self):
         return path.join(self.repo.working_tree_dir, 'src')
 

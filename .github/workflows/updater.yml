@@ -16,3 +16,5 @@ jobs:
     # Run updater
     - name: Run updater
       uses: ./.github/actions/updater
+      with:
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
