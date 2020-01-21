@@ -62,27 +62,24 @@ jobs:
     needs: test-deploy
 
     steps:
-    - uses: actions/gcloud/auth@master
-      name: Authenticate
-      env:
-        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
+    #
+    #
+    # Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
     #
     #
     # Promote archive
-    - uses: actions/gcloud/cli@master
-      name: Promote archive
-      with:
-        entrypoint: sh
-        args: |
-              -c "
-              export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
-              set +e
-              while true
-              do
-                  /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
-                  sleep 15
-              done"
+    - run: |
+            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            set +e
+            while true
+            do
+                /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
+                sleep 15
+            done
 
     #
     #

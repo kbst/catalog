@@ -71,13 +71,8 @@ jobs:
     #
     #
     # Upload archive
-    - uses: actions/gcloud/auth@master
-      name: Auth
-      env:
-        GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
-
-    - uses: actions/gcloud/cli@master
-      name: Upload
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
-        entrypoint: /builder/google-cloud-sdk/bin/gsutil
-        args: -m cp _dist/*.zip gs://dev.catalog.kubestack.com
+        service_account_key: ${{ secrets.GCLOUD_AUTH }}
+
+    - run: gsutil -m cp _dist/*.zip gs://dev.catalog.kubestack.com
