@@ -77,7 +77,7 @@ jobs:
             set +e
             while true
             do
-                /builder/google-cloud-sdk/bin/gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
+                gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
                 sleep 15
             done
 
