@@ -165,7 +165,7 @@ spec:
     kind: ClusterTask
     plural: clustertasks
     categories:
-    - all
+    - tekton
     - tekton-pipelines
   scope: Cluster
   # Opt into the status subresource so metadata.generation
@@ -198,7 +198,7 @@ spec:
     kind: Condition
     plural: conditions
     categories:
-    - all
+    - tekton
     - tekton-pipelines
   scope: Namespaced
   # Opt into the status subresource so metadata.generation
@@ -221,7 +221,6 @@ spec:
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -268,7 +267,7 @@ spec:
     kind: Pipeline
     plural: pipelines
     categories:
-    - all
+    - tekton
     - tekton-pipelines
   scope: Namespaced
   # Opt into the status subresource so metadata.generation
@@ -301,7 +300,7 @@ spec:
     kind: PipelineRun
     plural: pipelineruns
     categories:
-    - all
+    - tekton
     - tekton-pipelines
     shortNames:
     - pr
@@ -350,7 +349,7 @@ spec:
     kind: PipelineResource
     plural: pipelineresources
     categories:
-    - all
+    - tekton
     - tekton-pipelines
   scope: Namespaced
   # Opt into the status subresource so metadata.generation
@@ -383,7 +382,7 @@ spec:
     kind: Task
     plural: tasks
     categories:
-    - all
+    - tekton
     - tekton-pipelines
   scope: Namespaced
   # Opt into the status subresource so metadata.generation
@@ -416,7 +415,7 @@ spec:
     kind: TaskRun
     plural: taskruns
     categories:
-    - all
+    - tekton
     - tekton-pipelines
     shortNames:
     - tr
@@ -465,7 +464,7 @@ metadata:
   namespace: tekton-pipelines
 spec:
   ports:
-  - name: metrics
+  - name: http-metrics
     port: 9090
     protocol: TCP
     targetPort: 9090
@@ -496,7 +495,8 @@ metadata:
   namespace: tekton-pipelines
 spec:
   ports:
-  - port: 443
+  - name: https-webhook
+    port: 443
     targetPort: 8443
   selector:
     app: tekton-pipelines-webhook
@@ -628,7 +628,7 @@ metadata:
   name: config-defaults
   namespace: tekton-pipelines
 data:
-  _example: |
+  _example: |-
     ################################
     #                              #
     #    EXAMPLE CONFIGURATION     #
@@ -651,6 +651,17 @@ data:
     # default-service-account contains the default service account name
     # to use for TaskRun and PipelineRun, if none is specified.
     default-service-account: "default"
+
+    # default-managed-by-label-value contains the default value given to the
+    # "app.kubernetes.io/managed-by" label applied to all Pods created for
+    # TaskRuns. If a user's requested TaskRun specifies another value for this
+    # label, the user's request supercedes.
+    default-managed-by-label-value: "tekton-pipelines"
+
+    # default-pod-template contains the default pod template to use
+    # TaskRun and PipelineRun, if none is specified. If a pod template
+    # is specified, the default pod template is ignored.
+    # default-pod-template:
 
 ---
 # Copyright 2019 Tekton Authors LLC
@@ -789,6 +800,8 @@ spec:
     metadata:
       annotations:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        # tekton.dev/release value replaced with inputs.params.versionTag in pipeline/tekton/publish.yaml
+        tekton.dev/release: "v0.10.0"
       labels:
         app: tekton-pipelines-controller
         app.kubernetes.io/name: tekton-pipelines
@@ -797,15 +810,15 @@ spec:
       serviceAccountName: tekton-pipelines-controller
       containers:
       - name: tekton-pipelines-controller
-        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.9.2@sha256:cc5e186131c9141f512786e3e55aca432e4dae841cad55fbb57d51b17b79371a
-        args: ["-kubeconfig-writer-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/kubeconfigwriter:v0.9.2@sha256:5b85511e44ada028c016b9d6ac8612e9c34b2b35c9cace66c34ac3e25ea9ddae",
-          "-creds-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.9.2@sha256:a74a030d8c9fcb78eba2983296ad06854fdb22f477693de6984817f8498b0f73",
-          "-git-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.9.2@sha256:ce917a4a8f41a811c485fafec0f92774df3e09316da1d35e5a01e9e95a313f1e",
+        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.10.0@sha256:5d237ec66e6823fc3b7d84bd548f4e2836ba3e903e32304f0a8479896f6d4d8b
+        args: ["-kubeconfig-writer-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/kubeconfigwriter:v0.10.0@sha256:e4da67f14811a92a8fb790d788c4e01bedd03d29b92906f7e3953e450c1cf423",
+          "-creds-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.0@sha256:a2784da220c4fb0d66aee51ca3a4cc4a2ddf0397c9e0ac28685b27f9af473bed",
+          "-git-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.10.0@sha256:5b30b2e31583dde58285cfa6e024f4a33582c132c3126b7e8880fd4c51882dd1",
           "-nop-image", "tianon/true", "-shell-image", "busybox", "-gsutil-image",
-          "google/cloud-sdk", "-entrypoint-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.9.2@sha256:83b4e08d7117fb1eae593d4f79ea7a0b548ce8dd8dca7029d554b3fbf9610274",
-          "-imagedigest-exporter-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.9.2@sha256:10cc6e64fbb28ad87c1a95d7300caa4545fba7903996128198077cd65ca45f0e",
-          "-pr-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init:v0.9.2@sha256:e48df08c8b6a8b2ae57a0afff9190b2dcc59423c2e0bf49e2c69c4d5dab25df6",
-          "-build-gcs-fetcher-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/vendor/github.com/googlecloudplatform/cloud-builders/gcs-fetcher/cmd/gcs-fetcher:v0.9.2@sha256:8a5227733cec9506389cadccbdd54eaf50dbdfd86fbc49c78309741c70bd358c"]
+          "google/cloud-sdk", "-entrypoint-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.10.0@sha256:89ab96004f816c0cf83b5316be17b4d4b8c15857d3f1340cf510c5e9d83b7ad7",
+          "-imagedigest-exporter-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.10.0@sha256:5907ac4439c4a3b0e2c989ec135d2ab96db20eb3a2272b64ebc541274fbf30df",
+          "-pr-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init:v0.10.0@sha256:a98de5e4acb887983aad46d7064101b075b03ebc902d9a4300feab2bdaadfc74",
+          "-build-gcs-fetcher-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/vendor/github.com/googlecloudplatform/cloud-builders/gcs-fetcher/cmd/gcs-fetcher:v0.10.0@sha256:c41cc15ff178a2a0bb54a1cda8db29e02455d873d47bf8f7da1c6880077a9130"]
         volumeMounts:
         - name: config-logging
           mountPath: /etc/config-logging
@@ -818,6 +831,10 @@ spec:
           value: config-logging
         - name: CONFIG_OBSERVABILITY_NAME
           value: config-observability
+        - name: CONFIG_ARTIFACT_BUCKET_NAME
+          value: config-artifact-bucket
+        - name: CONFIG_ARTIFACT_PVC_NAME
+          value: config-artifact-pvc
         - name: METRICS_DOMAIN
           value: tekton.dev/pipeline
       volumes:
@@ -843,6 +860,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  # Note: the Deployment name must be the same as the Service name specified in
+  # config/400-webhook-service.yaml. If you change this name, you must also
+  # change the value of WEBHOOK_SERVICE_NAME below.
   name: tekton-pipelines-webhook
   namespace: tekton-pipelines
   labels:
@@ -867,7 +887,7 @@ spec:
       - name: webhook
         # This is the Go import path for the binary that is containerized
         # and substituted here.
-        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook:v0.9.2@sha256:3bb305e8a2fbacc43c69b9e5de37fe357ca21fcf00e75bb4fb9e36fcf6da28d9
+        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook:v0.10.0@sha256:7337152b0b38ea0d899c767c130e7027d7551d946974699dded273501057e2a3
         volumeMounts:
         - name: config-logging
           mountPath: /etc/config-logging
@@ -876,6 +896,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: WEBHOOK_SERVICE_NAME
+          value: tekton-pipelines-webhook
       volumes:
       - name: config-logging
         configMap:
