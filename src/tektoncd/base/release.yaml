@@ -791,6 +791,7 @@ metadata:
   labels:
     app.kubernetes.io/name: tekton-pipelines
     app.kubernetes.io/component: controller
+    tekton.dev/release: "v0.10.1"
 spec:
   replicas: 1
   selector:
@@ -801,7 +802,7 @@ spec:
       annotations:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
         # tekton.dev/release value replaced with inputs.params.versionTag in pipeline/tekton/publish.yaml
-        tekton.dev/release: "v0.10.0"
+        tekton.dev/release: "v0.10.1"
       labels:
         app: tekton-pipelines-controller
         app.kubernetes.io/name: tekton-pipelines
@@ -810,15 +811,15 @@ spec:
       serviceAccountName: tekton-pipelines-controller
       containers:
       - name: tekton-pipelines-controller
-        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.10.0@sha256:5d237ec66e6823fc3b7d84bd548f4e2836ba3e903e32304f0a8479896f6d4d8b
-        args: ["-kubeconfig-writer-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/kubeconfigwriter:v0.10.0@sha256:e4da67f14811a92a8fb790d788c4e01bedd03d29b92906f7e3953e450c1cf423",
-          "-creds-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.0@sha256:a2784da220c4fb0d66aee51ca3a4cc4a2ddf0397c9e0ac28685b27f9af473bed",
-          "-git-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.10.0@sha256:5b30b2e31583dde58285cfa6e024f4a33582c132c3126b7e8880fd4c51882dd1",
+        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller:v0.10.1@sha256:f4409692f43c4781d949847e661109c69c1a9acb8453cd1219b8341d642cb756
+        args: ["-kubeconfig-writer-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/kubeconfigwriter:v0.10.1@sha256:206c4e5de37d13c34f9538f87096db16433aadba264f24e9995cbb6b66fb67de",
+          "-creds-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.10.1@sha256:959b0d9a2d43d35e15a85460cc86567d308f467ee8ec16dbd9b32f51ce75d582",
+          "-git-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.10.1@sha256:18ffa2bfc14b1fa6d39f62271beacf6bbc38e7cd2e255184dec477c2936270bc",
           "-nop-image", "tianon/true", "-shell-image", "busybox", "-gsutil-image",
-          "google/cloud-sdk", "-entrypoint-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.10.0@sha256:89ab96004f816c0cf83b5316be17b4d4b8c15857d3f1340cf510c5e9d83b7ad7",
-          "-imagedigest-exporter-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.10.0@sha256:5907ac4439c4a3b0e2c989ec135d2ab96db20eb3a2272b64ebc541274fbf30df",
-          "-pr-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init:v0.10.0@sha256:a98de5e4acb887983aad46d7064101b075b03ebc902d9a4300feab2bdaadfc74",
-          "-build-gcs-fetcher-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/vendor/github.com/googlecloudplatform/cloud-builders/gcs-fetcher/cmd/gcs-fetcher:v0.10.0@sha256:c41cc15ff178a2a0bb54a1cda8db29e02455d873d47bf8f7da1c6880077a9130"]
+          "google/cloud-sdk", "-entrypoint-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/entrypoint:v0.10.1@sha256:cf0e81477c45dca0df6253e3239f6f0603700641292bf207503a7b267dc4c916",
+          "-imagedigest-exporter-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.10.1@sha256:1cf3f27f3ff7c73782d8a65853e8fc7f0d4aafc6443893e0150bdbe614a9169d",
+          "-pr-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/pullrequest-init:v0.10.1@sha256:3783254c379b286dd0987674160d3e19a95be1ccf0985788d6dcc0f159199095",
+          "-build-gcs-fetcher-image", "gcr.io/tekton-releases/github.com/tektoncd/pipeline/vendor/github.com/googlecloudplatform/cloud-builders/gcs-fetcher/cmd/gcs-fetcher:v0.10.1@sha256:70f8d32a572496169d451130541541cbc99434932fd28beea486189af8a2995a"]
         volumeMounts:
         - name: config-logging
           mountPath: /etc/config-logging
@@ -868,6 +869,7 @@ metadata:
   labels:
     app.kubernetes.io/name: tekton-pipelines
     app.kubernetes.io/component: webhook-controller
+    tekton.dev/release: "v0.10.1"
 spec:
   replicas: 1
   selector:
@@ -877,6 +879,7 @@ spec:
     metadata:
       annotations:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        tekton.dev/release: "v0.10.1"
       labels:
         app: tekton-pipelines-webhook
         app.kubernetes.io/name: tekton-pipelines
@@ -887,7 +890,7 @@ spec:
       - name: webhook
         # This is the Go import path for the binary that is containerized
         # and substituted here.
-        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook:v0.10.0@sha256:7337152b0b38ea0d899c767c130e7027d7551d946974699dded273501057e2a3
+        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook:v0.10.1@sha256:e0a277b69a742ff0e49767d11f9a1325fcea7fb8bbbf2572af9d49116cbb2385
         volumeMounts:
         - name: config-logging
           mountPath: /etc/config-logging
