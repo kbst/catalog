@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        kustomize-version: ["2.0.3", "3.1.0", "3.2.3"]
+        kustomize-version: ["3.2.3", "3.5.4"]
 
     steps:
     - uses: actions/checkout@v1
@@ -32,7 +32,7 @@ jobs:
       env:
           GIT_REF: ${{ github.ref }}
           GIT_SHA: ${{ github.sha }}
-      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:${{ matrix.kustomize-version }} bash -c './dist.py'
+      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python:3 bash -c './dist.py'
 
     #
     #
@@ -43,21 +43,11 @@ jobs:
 
   upload-build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        kustomize-version: ["3.2.3"]
+
     needs: test-build
 
     steps:
     - uses: actions/checkout@v1
-
-    #
-    #
-    # Build image
-    - name: Build image
-      env:
-        DOCKER_BUILDKIT: 1
-      run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t python3-kustomize:${{ matrix.kustomize-version}} .
 
     #
     #
@@ -66,7 +56,7 @@ jobs:
       env:
           GIT_REF: ${{ github.ref }}
           GIT_SHA: ${{ github.sha }}
-      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:${{ matrix.kustomize-version}} bash -c './dist.py'
+      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python:3 bash -c './dist.py'
 
     #
     #
