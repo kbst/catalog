@@ -1,11 +1,44 @@
-FROM python:3
+FROM python:3 as base
 
-ARG KUSTOMIZE_VERSION=3.2.3
+#
+#
+# tmp image to handle kustomize changing release artifacts
+FROM base as tmp
 
-RUN if dpkg --compare-versions "$KUSTOMIZE_VERSION" "lt" "3.2.1"; \
-    then export KUSTOMIZE_BINARY_PATH=https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64 ; \
-    else export KUSTOMIZE_BINARY_PATH=https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_kustomize.v${KUSTOMIZE_VERSION}_linux_amd64 ; \
-    fi && \
-    curl -Lso /usr/local/bin/kustomize ${KUSTOMIZE_BINARY_PATH} \
-    && chmod +x /usr/local/bin/kustomize \
-    && kustomize version
+ARG KUSTOMIZE_VERSION=3.5.4
+
+WORKDIR /tmp
+
+# Reject kustomize versions before 3.2.1
+RUN if dpkg --compare-versions "$KUSTOMIZE_VERSION" "lt" "3.2.1"; then \
+      echo "kustomize versions lower than 3.2.1 not supported" && \
+      exit; \
+    fi
+
+# Handle kustomize versions before 3.3.0
+# distributed as binaries
+RUN if dpkg --compare-versions "$KUSTOMIZE_VERSION" "lt" "3.3.0"; then \
+      KUSTOMIZE_BINARY_PATH="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_kustomize.v${KUSTOMIZE_VERSION}_linux_amd64"; \
+      curl -Lso /usr/local/bin/kustomize ${KUSTOMIZE_BINARY_PATH} && \
+      chmod +x /usr/local/bin/kustomize && \
+      kustomize version; \
+    fi
+
+# Handle kustomize versions after 3.3.0
+# distributed as tar files
+RUN if dpkg --compare-versions "$KUSTOMIZE_VERSION" "ge" "3.3.0"; \
+    then \
+      KUSTOMIZE_BINARY_PATH="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"; \
+      curl -LOs ${KUSTOMIZE_BINARY_PATH} && \
+      tar -xf kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
+      mv kustomize /usr/local/bin/kustomize && \
+      chmod +x /usr/local/bin/kustomize && \
+      kustomize version; \
+    fi
+
+#
+#
+# final image
+FROM base
+
+COPY --from=tmp /usr/local/bin/kustomize /usr/local/bin/kustomize
