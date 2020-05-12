@@ -4,10 +4,6 @@ kind: Deployment
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   name: sealed-secrets-controller
   namespace: kube-system
@@ -17,10 +13,6 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app.kubernetes.io/managed-by: jsonnet
-      app.kubernetes.io/name: kubeseal
-      app.kubernetes.io/part-of: kubeseal
-      app.kubernetes.io/version: v0.12.1
       name: sealed-secrets-controller
   strategy:
     rollingUpdate:
@@ -31,10 +23,6 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app.kubernetes.io/managed-by: jsonnet
-        app.kubernetes.io/name: kubeseal
-        app.kubernetes.io/part-of: kubeseal
-        app.kubernetes.io/version: v0.12.1
         name: sealed-secrets-controller
     spec:
       containers:
@@ -42,7 +30,7 @@ spec:
         command:
         - controller
         env: []
-        image: quay.io/bitnami/sealed-secrets-controller:v0.12.1
+        image: quay.io/bitnami/sealed-secrets-controller:v0.12.2
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -76,35 +64,30 @@ spec:
         name: tmp
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
+kind: Role
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
   namespace: kube-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: sealed-secrets-service-proxier
-subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: Group
-  name: system:authenticated
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - 'http:sealed-secrets-controller:'
+  - sealed-secrets-controller
+  resources:
+  - services/proxy
+  verbs:
+  - create
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   name: sealed-secrets-controller
   namespace: kube-system
@@ -118,14 +101,27 @@ subjects:
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-key-admin
+  name: sealed-secrets-key-admin
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   name: sealed-secrets-controller
 roleRef:
@@ -142,10 +138,6 @@ kind: ClusterRole
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: secrets-unsealer
   name: secrets-unsealer
 rules:
@@ -185,10 +177,6 @@ kind: ServiceAccount
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   name: sealed-secrets-controller
   namespace: kube-system
@@ -214,10 +202,6 @@ kind: Service
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   name: sealed-secrets-controller
   namespace: kube-system
@@ -226,54 +210,22 @@ spec:
   - port: 8080
     targetPort: 8080
   selector:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-controller
   type: ClusterIP
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
+kind: RoleBinding
 metadata:
   annotations: {}
   labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
   namespace: kube-system
-rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - 'http:sealed-secrets-controller:'
-  - sealed-secrets-controller
-  resources:
-  - services/proxy
-  verbs:
-  - create
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    app.kubernetes.io/managed-by: jsonnet
-    app.kubernetes.io/name: kubeseal
-    app.kubernetes.io/part-of: kubeseal
-    app.kubernetes.io/version: v0.12.1
-    name: sealed-secrets-key-admin
-  name: sealed-secrets-key-admin
-  namespace: kube-system
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-  - list
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: sealed-secrets-service-proxier
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:authenticated
