@@ -21,7 +21,7 @@ patchesJson6902:
 - path: patch-deployment-publish-service.yaml
   target:
     kind: Deployment
-    name: nginx-ingress-controller
+    name: ingress-nginx-controller
     namespace: ingress-kbst-default
     group: apps
     version: v1
