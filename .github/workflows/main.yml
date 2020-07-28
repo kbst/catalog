@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        kustomize-version: ["3.2.3", "3.5.4"]
+        kustomize-version: ["3.2.3", "3.5.4", "3.8.1"]
 
     steps:
     - uses: actions/checkout@v1
