@@ -1,3 +1,4 @@
+import re
 import logging
 import subprocess
 from os import listdir, path
@@ -81,16 +82,22 @@ class Catalog():
             stream.truncate()
 
     def update_entry(self, entry):
-        clean_version = str(entry.tag)
-        # remove unwanted upstream prefixes
-        if 'strip_prefix' in entry.metadata:
-            clean_version = clean_version.lstrip(
-                entry.metadata['strip_prefix'])
+        current_version = str(entry.tag)
+
+        # skip tags not matching regex
+        if 'filter_tags' in entry.metadata:
+            regex = entry.metadata['filter_tags']
+            match = re.match(regex, current_version)
+            if match:
+                current_version = match.group(1)
+            else:
+                # if the regex does not match, we skip this tag
+                return
 
         # in case upstream prefixes v, remove it
         # because we always prefix v for our tags
-        clean_version = clean_version.lstrip('v')
-        release_version = f'v{clean_version}'
+        current_version = current_version.lstrip('v')
+        release_version = f'v{current_version}'
         release_tag = f'{entry.name}-{release_version}-kbst.0'
 
         if release_tag in entry.releases:
