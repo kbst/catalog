@@ -17,49 +17,80 @@ def create_archive(name, version):
     print(f"[INFO] created `{archive}.zip`")
 
 
-SRCDIR = 'src'
-DISTDIR = '_dist'
+def get_build_targets(ref):
+    """ Returns build targets
 
-# Clean DISTDIR
-if isdir(DISTDIR):
-    rmtree(DISTDIR)
-mkdir(DISTDIR)
+        Returns a list of name and version tuples.
 
-# Get name and version
-ref_name = environ.get('GIT_REF', None)
-if not ref_name:
-    exit(f"[ERROR] `GIT_REF` env var not set")
+        If the ref name is prefixed with one of the available names,
+        it returns a list of length one.
 
-available_names = [n for n in listdir(SRCDIR) if not n.startswith('_')]
+        If the ref is a branch, a short commit hash will be appended
+        to the version.
 
-if ref_name.startswith('refs/tags/'):
-    # We're releasing a specific catalog entry
-    # tag must have name-version format
+        Refuse to build multiple artifacts for tags. Releases need
+        to be for a single entry.
+    """
+    name = None
+    version = None
 
-    release_version = ref_name.replace('refs/tags/', '')
+    if ref.startswith('refs/tags/'):
+        ref_name = ref.replace('refs/tags/', '')
+        hash_suffx = False
+    elif ref.startswith('refs/heads/'):
+        ref_name = ref.replace('refs/heads/', '')
+        hash_suffx = True
 
+    available_names = [n for n in listdir(SRCDIR) if not n.startswith('_')]
+
+    targets = []
     for name in available_names:
         prefix = f'{name}-'
-        if release_version.startswith(prefix):
-            version = release_version.replace(prefix, '')
-            break
 
-    if not isdir(f'{SRCDIR}/{name}'):
-        exit(f"[ERROR] `{name}` is not in catalog: {available_names}")
+        # Version based on tag (e.g. refs/tags/nginx-v0.43.1-kbst.0)
+        version = ref_name.replace(prefix, '')
 
-    create_archive(name, version)
-elif ref_name.startswith('refs/heads/'):
-    # We're not making a release, build all entries
+        # Version based on branch (e.g. refs/heads/nginx-mychange)
+        if hash_suffx:
+            hash = environ.get('GITHUB_SHA', None)[0:7]
+            if not hash:
+                exit(f"[ERROR] `GITHUB_SHA` env var not set")
 
-    branch = ref_name.replace('refs/heads/', '')
+            # Append hash to `mychange` from branch name
+            version = f'{version}-{hash}'
 
-    hash = environ.get('GIT_SHA', None)[0:7]
-    if not hash:
-        exit(f"[ERROR] `GIT_SHA` env var not set")
+        if ref_name.startswith(prefix):
+            # We're building a specific target
+            return [(name, version)]
+        else:
+            # We build all entries
+            targets.append((name, version))
 
-    version = f'{branch}-{hash}'
+    if ref.startswith('refs/tags/') and len(targets) != 1:
+        exit(f"[ERROR] Invalid `GITHUB_REF` '{ref}'. " +
+             f"Tags must be prefixed with one of {available_names}")
 
-    for name in available_names:
+    return targets
+
+
+if __name__ == "__main__":
+    SRCDIR = 'src'
+    DISTDIR = '_dist'
+
+    # Clean DISTDIR
+    if isdir(DISTDIR):
+        rmtree(DISTDIR)
+    mkdir(DISTDIR)
+
+    # Get name and version
+    ref = environ.get('GITHUB_REF', None)
+    if not ref:
+        exit(f"[ERROR] `GITHUB_REF` env var not set")
+
+    if not ref.startswith('refs/tags/') and not ref.startswith('refs/heads/'):
+        exit(f"[ERROR] unexpected `GITHUB_REF`: {ref}")
+
+    build_targets = get_build_targets(ref)
+
+    for name, version in build_targets:
         create_archive(name, version)
-else:
-    exit(f"[ERROR] unexpected `REF_NAME`: {ref_name}")
