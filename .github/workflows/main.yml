@@ -27,7 +27,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: _dist
-        path: _dist
+        path: _dist/*.zip
 
   test-kustomize:
     runs-on: ubuntu-latest
@@ -54,13 +54,13 @@ jobs:
     - name: Build image
       env:
         DOCKER_BUILDKIT: 1
-      run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t python3-kustomize:${{ matrix.kustomize-version }} test/kustomize/
+      run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t test-kustomize:${{ matrix.kustomize-version }} test/kustomize/
 
     #
     #
     # Run tests
     - name: Run tests
-      run: docker run -v /home/runner/work/catalog/catalog/_dist:/github/workspace/_dist -w /github/workspace python3-kustomize:${{ matrix.kustomize-version }}
+      run: docker run -v `pwd`/_dist:/_dist test-kustomize:${{ matrix.kustomize-version }}
 
   test-kind:
     runs-on: ubuntu-latest
@@ -89,13 +89,13 @@ jobs:
     #
     # Build test image
     - name: Build test image
-      run: docker build -t testimg test/kind/
+      run: docker build -t test-kind test/kind/
 
     #
     #
     # Deploy to cluster
     - name: Run test container
-      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig testimg
+      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-kind
 
 
   publish:

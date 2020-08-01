@@ -41,8 +41,17 @@ RUN if dpkg --compare-versions "$KUSTOMIZE_VERSION" "ge" "3.3.0"; \
 # final image
 FROM base
 
-COPY test.py /opt/tester/test.py
+COPY Pipfile Pipfile.lock /opt/
+WORKDIR /opt
+
+RUN pip install --no-cache-dir pipenv &&\
+  PIPENV_VENV_IN_PROJECT=true pipenv install
+
+COPY test.py /opt/test/test.py
 
 COPY --from=tmp /usr/local/bin/kustomize /usr/local/bin/kustomize
 
-CMD ["python", "/opt/tester/test.py"]
+ENV PATH=/opt/.venv/bin:$PATH
+
+WORKDIR /opt/test
+CMD ["nosetests", "test.py"]
