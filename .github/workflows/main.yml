@@ -8,14 +8,45 @@ on:
     - "*"  # run for tags
 
 jobs:
-  test-build:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    #
+    #
+    # Run builder
+    - name: Run updater
+      uses: ./.github/actions/builder
+
+    #
+    #
+    # Upload artifacts
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v2
+      with:
+        name: _dist
+        path: _dist/*.zip
+
+  test-kustomize:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         kustomize-version: ["3.2.3", "3.5.4", "3.8.1"]
+    needs: build
 
     steps:
     - uses: actions/checkout@v1
+
+    #
+    #
+    # Download build artifacts
+    - name: 'Download build-artifacts'
+      uses: actions/download-artifact@v2
+      with:
+        name: _dist
+        path: _dist
 
     #
     #
@@ -23,40 +54,63 @@ jobs:
     - name: Build image
       env:
         DOCKER_BUILDKIT: 1
-      run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t python3-kustomize:${{ matrix.kustomize-version }} .
+      run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t test-kustomize:${{ matrix.kustomize-version }} test/kustomize/
 
     #
     #
-    # Run dist.py
-    - name: Run dist.py
-      env:
-          GIT_REF: ${{ github.ref }}
-          GIT_SHA: ${{ github.sha }}
-      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python:3 bash -c './dist.py'
+    # Run tests
+    - name: Run tests
+      run: docker run -v `pwd`/_dist:/_dist test-kustomize:${{ matrix.kustomize-version }}
 
-    #
-    #
-    # Run test.py
-    - name: Run test.py
-      run: docker run -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python3-kustomize:${{ matrix.kustomize-version }} bash -c './test.py'
-
-
-  upload-build:
+  test-kind:
     runs-on: ubuntu-latest
-
-    needs: test-build
+    needs: build
 
     steps:
     - uses: actions/checkout@v1
 
     #
     #
-    # Run dist.py
-    - name: Run dist.py
-      env:
-          GIT_REF: ${{ github.ref }}
-          GIT_SHA: ${{ github.sha }}
-      run: docker run -e GIT_REF -e GIT_SHA -v /home/runner/work/catalog/catalog:/github/workspace -w /github/workspace python:3 bash -c './dist.py'
+    # Setup Kind
+    - uses: engineerd/setup-kind@v0.4.0
+      with:
+        config: test/kind/kind-config.yaml
+
+    #
+    #
+    # Download build artifacts
+    - name: 'Download build-artifacts'
+      uses: actions/download-artifact@v2
+      with:
+        name: _dist
+        path: _dist
+
+    #
+    #
+    # Build test image
+    - name: Build test image
+      run: docker build -t test-kind test/kind/
+
+    #
+    #
+    # Deploy to cluster
+    - name: Run test container
+      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-kind
+
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [test-kustomize, test-kind]
+
+    steps:
+    #
+    #
+    # Download build artifacts
+    - name: 'Download build-artifacts'
+      uses: actions/download-artifact@v2
+      with:
+        name: _dist
+        path: _dist
 
     #
     #

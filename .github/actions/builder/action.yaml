@@ -1,0 +1,5 @@
+name: "Catalog Builder"
+description: "Build artifacts from catalog entries."
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
