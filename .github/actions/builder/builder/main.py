@@ -41,6 +41,10 @@ def get_build_targets(ref):
         ref_name = ref.replace('refs/heads/', '')
         hash_suffx = True
 
+    hash = environ.get('GITHUB_SHA', None)[0:7]
+    if not hash:
+        exit(f"[ERROR] `GITHUB_SHA` env var not set")
+
     available_names = [n for n in listdir(SRCDIR) if not n.startswith('_')]
 
     targets = []
@@ -52,9 +56,6 @@ def get_build_targets(ref):
 
         # Version based on branch (e.g. refs/heads/nginx-mychange)
         if hash_suffx:
-            hash = environ.get('GITHUB_SHA', None)[0:7]
-            if not hash:
-                exit(f"[ERROR] `GITHUB_SHA` env var not set")
 
             # Append hash to `mychange` from branch name
             version = f'{version}-{hash}'
@@ -70,7 +71,14 @@ def get_build_targets(ref):
         exit(f"[ERROR] Invalid `GITHUB_REF` '{ref}'. " +
              f"Tags must be prefixed with one of {available_names}")
 
-    return targets
+    if ref.startswith('refs/heads/all-'):
+        # Building all targets takes very long, we only do so
+        # when the branch name starts with `all-`
+        return targets
+
+    # if neither a specifc nor all entries were requested
+    # we default to the test entry
+    return [("test", f"{ref_name}-{hash}")]
 
 
 if __name__ == "__main__":
