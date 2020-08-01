@@ -8,20 +8,21 @@ on:
     - "*"  # run for tags
 
 jobs:
+
+
+  #
+  #
+  # Build artifacts
   build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
 
-    #
-    #
     # Run builder
-    - name: Run updater
+    - name: Run builder
       uses: ./.github/actions/builder
 
-    #
-    #
     # Upload artifacts
     - name: 'Upload artifacts'
       uses: actions/upload-artifact@v2
@@ -29,6 +30,10 @@ jobs:
         name: _dist
         path: _dist/*.zip
 
+
+  #
+  #
+  # Test `kustomize build`
   test-kustomize:
     runs-on: ubuntu-latest
     strategy:
@@ -37,10 +42,9 @@ jobs:
     needs: build
 
     steps:
+    # Checkout
     - uses: actions/checkout@v1
 
-    #
-    #
     # Download build artifacts
     - name: 'Download build-artifacts'
       uses: actions/download-artifact@v2
@@ -48,36 +52,33 @@ jobs:
         name: _dist
         path: _dist
 
-    #
-    #
     # Build image
     - name: Build image
       env:
         DOCKER_BUILDKIT: 1
       run: docker build --build-arg KUSTOMIZE_VERSION=${{ matrix.kustomize-version }} -t test-kustomize:${{ matrix.kustomize-version }} test/kustomize/
 
-    #
-    #
     # Run tests
     - name: Run tests
       run: docker run -v `pwd`/_dist:/_dist test-kustomize:${{ matrix.kustomize-version }}
 
+
+  #
+  #
+  # Test deploy to KinD
   test-kind:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+    # Checkout
     - uses: actions/checkout@v1
 
-    #
-    #
     # Setup Kind
     - uses: engineerd/setup-kind@v0.4.0
       with:
         config: test/kind/kind-config.yaml
 
-    #
-    #
     # Download build artifacts
     - name: 'Download build-artifacts'
       uses: actions/download-artifact@v2
@@ -85,26 +86,23 @@ jobs:
         name: _dist
         path: _dist
 
-    #
-    #
     # Build test image
     - name: Build test image
       run: docker build -t test-kind test/kind/
 
-    #
-    #
     # Deploy to cluster
     - name: Run test container
       run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-kind
 
 
+  #
+  #
+  #
   publish:
     runs-on: ubuntu-latest
     needs: [test-kustomize, test-kind]
 
     steps:
-    #
-    #
     # Download build artifacts
     - name: 'Download build-artifacts'
       uses: actions/download-artifact@v2
@@ -112,11 +110,42 @@ jobs:
         name: _dist
         path: _dist
 
-    #
-    #
     # Upload archive
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
     - run: gsutil -m cp _dist/*.zip gs://dev.catalog.kubestack.com
+
+
+  #
+  #
+  # Promote tagged releases
+  # from `dev.catalog.kubestack.com` to `catalog.kubestack.com`
+  promote:
+    runs-on: ubuntu-latest
+    needs: publish
+    # promote only for tags
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    # Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCLOUD_AUTH }}
+
+    # Promote archive
+    - run: |
+            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            set +e
+            while true
+            do
+                gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
+                sleep 15
+            done
+
+    # Check promotion
+    - name: Check promotion
+      run: |
+            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            wget https://storage.googleapis.com/catalog.kubestack.com/${NAME}.zip
