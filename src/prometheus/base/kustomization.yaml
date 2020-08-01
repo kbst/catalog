@@ -3,6 +3,6 @@ kind: Kustomization
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/prometheus
   catalog.kubestack.com/variant: base
-  app.kubernetes.io/version: v0.40.0
+  app.kubernetes.io/version: v0.41.0
 resources:
 - bundle.yaml
