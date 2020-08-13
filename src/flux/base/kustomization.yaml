@@ -9,8 +9,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/flux
-  catalog.kubestack.com/variant: base:app.kubernetes.io/version:v1.20.0
-  app.kubernetes.io/version: v1.20.0
+  catalog.kubestack.com/variant: base
+  app.kubernetes.io/version: v1.20.1
 commonLabels:
   app.kubernetes.io/component: controller
   app.kubernetes.io/managed-by: kubestack
