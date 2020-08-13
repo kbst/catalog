@@ -5,6 +5,8 @@ source_path=$1
 target_path=$2
 version=$3
 
+rm -rf $target_path/base
+mkdir -p $target_path/base
 cp $source_path/deploy/* $target_path/base/
 
 cd $target_path/base/
