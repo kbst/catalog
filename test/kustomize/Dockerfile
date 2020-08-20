@@ -54,4 +54,4 @@ COPY --from=tmp /usr/local/bin/kustomize /usr/local/bin/kustomize
 ENV PATH=/opt/.venv/bin:$PATH
 
 WORKDIR /opt/test
-CMD ["nosetests", "test.py"]
+CMD ["nosetests", "-s", "test.py"]
