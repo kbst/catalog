@@ -1,0 +1,2 @@
+url: https://github.com/argoproj/argo-cd.git
+filter_tags: ^v(.+)
