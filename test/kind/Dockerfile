@@ -12,4 +12,4 @@ ENV PATH=/opt/.venv/bin:$PATH \
     KUBECONFIG=/opt/test/.kubeconfig
 
 WORKDIR /opt/test
-CMD ["nosetests", "test.py"]
+CMD ["nosetests", "-s", "test.py"]
