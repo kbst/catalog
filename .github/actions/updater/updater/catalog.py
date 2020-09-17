@@ -120,10 +120,6 @@ class Catalog():
         if not script_success:
             return
 
-        # update or set version annotation on base
-        base_path = path.join(target_path, 'base')
-        self.update_version_annotation(base_path, release_version)
-
         # update or set version annotation on all variants
         for variant in self.get_variants(entry):
             variant_path = path.join(target_path, variant)
