@@ -1,5 +1,9 @@
 name: "Catalog Updater"
 description: "Update catalog entries with latest upstream releases."
+inputs:
+  github_token:
+    description: 'GitHub token used to push branches'
+    required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
