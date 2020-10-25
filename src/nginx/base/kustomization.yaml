@@ -9,7 +9,8 @@ commonLabels:
   app.kubernetes.io/component: ingress-controller
   app.kubernetes.io/managed-by: kubestack
   app.kubernetes.io/name: nginx
-patchesStrategicMerge:
-- patch-replicas.yaml
 resources:
 - mandatory.yaml
+replicas:
+- name: ingress-nginx-controller
+  count: 2
