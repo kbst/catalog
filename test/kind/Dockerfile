@@ -12,4 +12,4 @@ ENV PATH=/opt/.venv/bin:$PATH \
     KUBECONFIG=/opt/test/.kubeconfig
 
 WORKDIR /opt/test
-CMD ["nosetests", "-s", "test.py"]
+CMD ["nosetests", "-s", "--logging-level", "WARNING", "test.py"]
