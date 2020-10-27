@@ -12,11 +12,17 @@ from kubernetes import client, config
 
 DISTDIR = "/_dist"
 TESTDIR = TemporaryDirectory()
+TIMEOUT = 180  # 3 minutes in seconds
 
 
-def run_cmd(name, cmd):
+def run_cmd(name, cmd, timeout):
+    start = time.time()
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     while True:
+        # we give up
+        if (time.time() - start) >= timeout:
+            break
+
         exit_code = p.poll()
         if exit_code is not None:
             break
@@ -40,8 +46,13 @@ def wait_retries(name, timeout):
 
     count = 0
     start = time.time()
+    failed_pods = []
 
     while True:
+        # we give up
+        if (time.time() - start) >= timeout:
+            break
+
         failed_pods = []
 
         ret = v1.list_pod_for_all_namespaces(watch=False)
@@ -68,13 +79,10 @@ def wait_retries(name, timeout):
         if len(failed_pods) == 0:
             break
 
-        # we're not done, check timeout
+        # we're not done
         # sleep a little, then try again
         count += 1
-        if time.time() - start >= timeout:
-            break
-
-        time.sleep(count * 2)
+        time.sleep(min(count * 2, 30))
 
     # output debug info
     if len(failed_pods) > 0:
@@ -98,7 +106,7 @@ def setup():
 
         unpack_archive(path, TESTDIR.name, "zip")
 
-    run_cmd("init", ["terraform", "init"])
+    run_cmd("init", ["terraform", "init"], TIMEOUT)
 
 
 def teardown():
@@ -124,7 +132,7 @@ def test_cmd():
                           "cmd": ["terraform",
                                   "apply",
                                   "--auto-approve",
-                                  "--parallelism=30",
+                                  "--parallelism=40",
                                   tfvar_arg]},
                 "wait": {"type": "wait_retries"},
                 "destroy": {"type": "run_cmd",
@@ -137,6 +145,6 @@ def test_cmd():
             # yield instructs nose to treat each step as a separate test
             for step in steps.values():
                 if step["type"] == "run_cmd":
-                    yield run_cmd, f"{entry}/{overlay}", step["cmd"]
+                    yield run_cmd, f"{entry}/{overlay}", step["cmd"], TIMEOUT
                 if step["type"] == "wait_retries":
-                    yield wait_retries, f"{entry}/{overlay}", 180
+                    yield wait_retries, f"{entry}/{overlay}", TIMEOUT
