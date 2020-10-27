@@ -132,7 +132,7 @@ def test_cmd():
                           "cmd": ["terraform",
                                   "apply",
                                   "--auto-approve",
-                                  "--parallelism=30",
+                                  "--parallelism=40",
                                   tfvar_arg]},
                 "wait": {"type": "wait_retries"},
                 "destroy": {"type": "run_cmd",
