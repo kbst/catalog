@@ -97,6 +97,30 @@ def wait_retries(name, timeout):
     assert len(failed_pods) == 0
 
 
+def run_steps(name, path):
+    tfvar_arg = f"--var=path={path}"
+    steps = {
+        "apply": {"type": "run_cmd",
+                          "cmd": ["terraform",
+                                  "apply",
+                                  "--auto-approve",
+                                  "--parallelism=40",
+                                  tfvar_arg]},
+        "wait": {"type": "wait_retries"},
+        "destroy": {"type": "run_cmd",
+                            "cmd": ["terraform",
+                                    "destroy",
+                                    "--auto-approve",
+                                    tfvar_arg]}
+    }
+
+    for step in steps.values():
+        if step["type"] == "run_cmd":
+            run_cmd(name, step["cmd"], TIMEOUT)
+        if step["type"] == "wait_retries":
+            wait_retries(name, TIMEOUT)
+
+
 def setup():
     # unpack zip archives in DISTDIR
     for name in listdir(DISTDIR):
@@ -114,7 +138,7 @@ def teardown():
 
 
 @with_setup(setup, teardown)
-def test_cmd():
+def test_variants():
     for entry in listdir(TESTDIR.name):
         entry_path = join(TESTDIR.name, entry)
         if not isdir(entry_path):
@@ -125,26 +149,5 @@ def test_cmd():
             if not isdir(overlay_path):
                 continue
 
-            tfvar_arg = f"--var=path={overlay_path}"
-
-            steps = {
-                "apply": {"type": "run_cmd",
-                          "cmd": ["terraform",
-                                  "apply",
-                                  "--auto-approve",
-                                  "--parallelism=40",
-                                  tfvar_arg]},
-                "wait": {"type": "wait_retries"},
-                "destroy": {"type": "run_cmd",
-                            "cmd": ["terraform",
-                                    "destroy",
-                                    "--auto-approve",
-                                    tfvar_arg]}
-            }
-
-            # yield instructs nose to treat each step as a separate test
-            for step in steps.values():
-                if step["type"] == "run_cmd":
-                    yield run_cmd, f"{entry}/{overlay}", step["cmd"], TIMEOUT
-                if step["type"] == "wait_retries":
-                    yield wait_retries, f"{entry}/{overlay}", TIMEOUT
+            # yield instructs nose to treat each variant as a separate test
+            yield run_steps, f"{entry}/{overlay}", overlay_path
