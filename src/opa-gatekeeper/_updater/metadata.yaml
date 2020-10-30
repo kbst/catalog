@@ -1,2 +1,2 @@
 url: https://github.com/open-policy-agent/gatekeeper.git
-filter_tags: ^v(.+)
+filter_tags: ^v([0-9.]+)$
