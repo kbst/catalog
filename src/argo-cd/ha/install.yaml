@@ -3083,7 +3083,7 @@ spec:
         - "10"
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.7.8
+        image: argoproj/argocd:v1.7.10
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -3139,7 +3139,7 @@ spec:
         - -n
         - /usr/local/bin/argocd-util
         - /shared
-        image: argoproj/argocd:v1.7.8
+        image: argoproj/argocd:v1.7.10
         imagePullPolicy: Always
         name: copyutil
         volumeMounts:
@@ -3189,7 +3189,7 @@ spec:
         - argocd-repo-server
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.7.8
+        image: argoproj/argocd:v1.7.10
         imagePullPolicy: Always
         name: argocd-repo-server
         ports:
@@ -3264,7 +3264,7 @@ spec:
         env:
         - name: ARGOCD_API_SERVER_REPLICAS
           value: "2"
-        image: argoproj/argocd:v1.7.8
+        image: argoproj/argocd:v1.7.10
         imagePullPolicy: Always
         name: argocd-server
         ports:
@@ -3333,7 +3333,7 @@ spec:
         - /data/conf/redis.conf
         command:
         - redis-server
-        image: redis:5.0.8-alpine
+        image: redis:5.0.10-alpine
         imagePullPolicy: IfNotPresent
         livenessProbe:
           initialDelaySeconds: 15
@@ -3351,7 +3351,7 @@ spec:
         - /data/conf/sentinel.conf
         command:
         - redis-sentinel
-        image: redis:5.0.8-alpine
+        image: redis:5.0.10-alpine
         imagePullPolicy: IfNotPresent
         livenessProbe:
           initialDelaySeconds: 15
@@ -3377,7 +3377,7 @@ spec:
           value: 896627000a81c7bdad8dbdcffd39728c9c17b309
         - name: SENTINEL_ID_2
           value: 3acbca861108bc47379b71b1d87d1c137dce591f
-        image: redis:5.0.8-alpine
+        image: redis:5.0.10-alpine
         imagePullPolicy: IfNotPresent
         name: config-init
         resources: {}
