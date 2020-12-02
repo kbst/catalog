@@ -3,7 +3,7 @@ kind: Kustomization
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/opa-gatekeeper
   catalog.kubestack.com/variant: base
-  app.kubernetes.io/version: v3.2.1
+  app.kubernetes.io/version: v3.2.2
 commonLabels:
   app.kubernetes.io/component: admission-controller
   app.kubernetes.io/managed-by: kubestack
