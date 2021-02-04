@@ -112,7 +112,7 @@ jobs:
         path: _dist
 
     # Upload archive
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+    - uses: google-github-actions/setup-gcloud@v0.2.0
       with:
         service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
@@ -131,7 +131,7 @@ jobs:
 
     steps:
     # Setup gcloud CLI
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+    - uses: google-github-actions/setup-gcloud@v0.2.0
       with:
         service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
