@@ -6,7 +6,7 @@ namespace: ingress-kbst-default
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/nginx
   catalog.kubestack.com/variant: default-ingress
-  app.kubernetes.io/version: v0.43.0
+  app.kubernetes.io/version: v0.44.0
 commonLabels:
   app.kubernetes.io/component: ingress-controller
   app.kubernetes.io/managed-by: kubestack
