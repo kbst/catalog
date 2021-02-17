@@ -9,15 +9,16 @@ from tempfile import TemporaryDirectory
 from nose import with_setup
 from shutil import unpack_archive
 from kubernetes import client, config
+from jinja2 import Environment, FileSystemLoader
 
 DISTDIR = "/_dist"
 TESTDIR = TemporaryDirectory()
 TIMEOUT = 300  # 5 minutes in seconds
 
 
-def run_cmd(name, cmd, timeout):
+def run_cmd(name, path, cmd, timeout):
     start = time.time()
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, cwd=path, stdout=PIPE, stderr=PIPE)
     while True:
         # we give up
         if (time.time() - start) >= timeout:
@@ -98,25 +99,26 @@ def wait_retries(name, timeout):
 
 
 def run_steps(name, path):
-    tfvar_arg = f"--var=path={path}"
     steps = {
+        "init": {"type": "run_cmd",
+                 "path": path,
+                 "cmd": ["terraform", "init"]},
         "apply": {"type": "run_cmd",
+                          "path": path,
                           "cmd": ["terraform",
                                   "apply",
-                                  "--auto-approve",
-                                  "--parallelism=40",
-                                  tfvar_arg]},
+                                  "--auto-approve"]},
         "wait": {"type": "wait_retries"},
         "destroy": {"type": "run_cmd",
+                            "path": path,
                             "cmd": ["terraform",
                                     "destroy",
-                                    "--auto-approve",
-                                    tfvar_arg]}
+                                    "--auto-approve"]}
     }
 
     for step in steps.values():
         if step["type"] == "run_cmd":
-            run_cmd(name, step["cmd"], TIMEOUT)
+            run_cmd(name, step["path"], step["cmd"], TIMEOUT)
         if step["type"] == "wait_retries":
             wait_retries(name, TIMEOUT)
 
@@ -130,8 +132,6 @@ def setup():
 
         unpack_archive(path, TESTDIR.name, "zip")
 
-    run_cmd("init", ["terraform", "init"], TIMEOUT)
-
 
 def teardown():
     TESTDIR.cleanup()
@@ -139,15 +139,27 @@ def teardown():
 
 @with_setup(setup, teardown)
 def test_variants():
+    root_module = TESTDIR.name
     for entry in listdir(TESTDIR.name):
-        entry_path = join(TESTDIR.name, entry)
-        if not isdir(entry_path):
+        entry_module = join(TESTDIR.name, entry)
+        if not isdir(entry_module):
             continue
 
-        for overlay in listdir(entry_path):
-            overlay_path = join(entry_path, overlay)
-            if not isdir(overlay_path):
+        for variant in listdir(entry_module):
+            variant_path = join(entry_module, variant)
+            if not isdir(variant_path):
                 continue
 
+            # write main.tf into root_module
+            jinja = Environment(loader=FileSystemLoader("."))
+            template = jinja.get_template('main.tf.tpl')
+            data = template.render(
+                {'entry_module': entry_module, 'variant': variant})
+
+            with open(f'{root_module}/main.tf', 'w') as f:
+                f.write(data)
+                # always include newline at end of file
+                f.write('\n')
+
             # yield instructs nose to treat each variant as a separate test
-            yield run_steps, f"{entry}/{overlay}", overlay_path
+            yield run_steps, f"{entry}/{variant}", root_module
