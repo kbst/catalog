@@ -1,95 +1,91 @@
-variable "common_annotations" {
-  type        = map(string)
-  description = "Annotations to add to all resources."
-  default     = null
+variable "configuration" {
+  type = map(object({
+    common_annotations = optional(map(string))
+    common_labels      = optional(map(string))
+    components         = optional(list(string))
+    config_map_generator = optional(list(object({
+      name      = optional(string)
+      namespace = optional(string)
+      behavior  = optional(string)
+      envs      = optional(list(string))
+      files     = optional(list(string))
+      literals  = optional(list(string))
+      options = optional(object({
+        labels                   = optional(map(string))
+        annotations              = optional(map(string))
+        disable_name_suffix_hash = optional(bool)
+      }))
+    })))
+    crds       = optional(list(string))
+    generators = optional(list(string))
+    generator_options = optional(object({
+      labels                   = optional(map(string))
+      annotations              = optional(map(string))
+      disable_name_suffix_hash = optional(bool)
+    }))
+    images = optional(list(object({
+      name     = optional(string)
+      new_name = optional(string)
+      new_tag  = optional(string)
+      digest   = optional(string)
+    })))
+    name_prefix = optional(string)
+    namespace   = optional(string)
+    name_suffix = optional(string)
+    patches = optional(list(object({
+      path  = optional(string)
+      patch = optional(string)
+      target = optional(object({
+        group               = optional(string)
+        version             = optional(string)
+        kind                = optional(string)
+        name                = optional(string)
+        namespace           = optional(string)
+        label_selector      = optional(string)
+        annotation_selector = optional(string)
+      }))
+    })))
+    replicas = optional(list(object({
+      name  = optional(string)
+      count = optional(number)
+    })))
+    secret_generator = optional(list(object({
+      name      = optional(string)
+      namespace = optional(string)
+      behavior  = optional(string)
+      type      = optional(string)
+      envs      = optional(list(string))
+      files     = optional(list(string))
+      literals  = optional(list(string))
+      options = optional(object({
+        labels                   = optional(map(string))
+        annotations              = optional(map(string))
+        disable_name_suffix_hash = optional(bool)
+      }))
+    })))
+    transformers = optional(list(string))
+    vars = optional(list(object({
+      name = optional(string)
+      obj_ref = optional(object({
+        api_version = optional(string)
+        group       = optional(string)
+        version     = optional(string)
+        kind        = optional(string)
+        name        = optional(string)
+        namespace   = optional(string)
+      }))
+      field_ref = optional(object({
+        field_path = optional(string)
+      }))
+    })))
+    variant = optional(string)
+  }))
+  description = "Map with per workspace module configuration."
+  default     = { apps = {}, ops = {}, loc = {} }
 }
 
-variable "common_labels" {
-  type        = map(string)
-  description = "Labels to add to all resources."
-  default     = null
-}
-
-variable "components" {
-  type        = list(string)
-  description = "Paths to Kustomize components."
-  default     = null
-}
-
-variable "config_map_generator" {
-  type        = list(any)
-  description = "ConfigMaps to generate."
-  default     = []
-}
-
-variable "crds" {
-  type        = list(string)
-  description = "List of paths to OpenAPI schema files as expected by Kustomize."
-  default     = null
-}
-
-variable "generators" {
-  type        = list(string)
-  description = "List of paths to Kustomize generators."
-  default     = null
-}
-
-variable "generator_options" {
-  type        = any
-  description = "Global Kustomize generator options."
-  default     = null
-}
-
-variable "images" {
-  type        = list(any)
-  description = "List of images blocks."
-  default     = []
-}
-
-variable "name_prefix" {
+variable "configuration_base_key" {
   type        = string
-  description = "Prefix to add to names."
-  default     = null
-}
-
-variable "namespace" {
-  type        = string
-  description = "The namespace to use."
-  default     = null
-}
-
-variable "name_suffix" {
-  type        = string
-  description = "Suffix to add to names."
-  default     = null
-}
-
-variable "patches" {
-  type        = list(any)
-  description = "List of patches."
-  default     = []
-}
-
-variable "replicas" {
-  type        = list(any)
-  description = "List of replicas."
-  default     = []
-}
-
-variable "secret_generator" {
-  type        = list(any)
-  description = "List of secret_generators."
-  default     = []
-}
-
-variable "transformers" {
-  type        = list(string)
-  description = "List of paths to Kustomize transformers."
-  default     = null
-}
-
-variable "vars" {
-  type        = list(any)
-  description = "List of vars."
-  default     = []
+  description = "The key in the configuration map all other keys inherit from."
+  default     = "apps"
 }

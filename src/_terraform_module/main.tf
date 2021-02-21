@@ -1,12 +1,12 @@
 data "kustomization_overlay" "current" {
-  common_annotations = var.common_annotations
+  common_annotations = local.common_annotations
 
-  common_labels = var.common_labels
+  common_labels = local.common_labels
 
-  components = var.components
+  components = local.components
 
   dynamic "config_map_generator" {
-    for_each = var.config_map_generator
+    for_each = local.config_map_generator
     iterator = i
     content {
       name      = lookup(i.value, "name", null)
@@ -23,12 +23,12 @@ data "kustomization_overlay" "current" {
     }
   }
 
-  crds = var.crds
+  crds = local.crds
 
-  generators = var.generators
+  generators = local.generators
 
   dynamic "generator_options" {
-    for_each = var.generator_options != null ? [var.generator_options] : []
+    for_each = local.generator_options != null ? [local.generator_options] : []
     iterator = i
     content {
       labels                   = lookup(i.value, "labels", null)
@@ -38,7 +38,7 @@ data "kustomization_overlay" "current" {
   }
 
   dynamic "images" {
-    for_each = var.images
+    for_each = local.images
     iterator = i
     content {
       name     = lookup(i.value, "name", null)
@@ -48,14 +48,14 @@ data "kustomization_overlay" "current" {
     }
   }
 
-  name_prefix = var.name_prefix
+  name_prefix = local.name_prefix
 
-  namespace = var.namespace
+  namespace = local.namespace
 
-  name_suffix = var.name_suffix
+  name_suffix = local.name_suffix
 
   dynamic "patches" {
-    for_each = var.patches
+    for_each = local.patches
     iterator = i
     content {
       path   = lookup(i.value, "path", null)
@@ -65,7 +65,7 @@ data "kustomization_overlay" "current" {
   }
 
   dynamic "replicas" {
-    for_each = var.replicas
+    for_each = local.replicas
     iterator = i
     content {
       name  = lookup(i.value, "name", null)
@@ -74,7 +74,7 @@ data "kustomization_overlay" "current" {
   }
 
   dynamic "secret_generator" {
-    for_each = var.secret_generator
+    for_each = local.secret_generator
     iterator = i
     content {
       name      = lookup(i.value, "name", null)
@@ -92,8 +92,10 @@ data "kustomization_overlay" "current" {
     }
   }
 
+  transformers = local.transformers
+
   dynamic "vars" {
-    for_each = var.vars
+    for_each = local.vars
     iterator = i
     content {
       name = lookup(i.value, "name", null)
@@ -111,7 +113,7 @@ data "kustomization_overlay" "current" {
     }
   }
 
-  resources = ["${path.module}/${var.variant}/"]
+  resources = ["${path.module}/${local.variant}/"]
 }
 
 resource "kustomization_resource" "p0" {
