@@ -4,7 +4,7 @@ namespace: argocd
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/argo-cd
   catalog.kubestack.com/variant: ha
-  app.kubernetes.io/version: v1.8.5
+  app.kubernetes.io/version: v1.8.6
   app.kubernetes.io/managed-by: kubestack
 resources:
 - namespace.yaml
