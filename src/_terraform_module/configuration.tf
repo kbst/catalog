@@ -41,6 +41,8 @@ locals {
   vars = lookup(local.cfg, "vars", null) != null ? local.cfg["vars"] : []
 
   variant = lookup(local.cfg, "variant", null) != null ? local.cfg["variant"] : var.variant
+
+  additional_resources = lookup(local.cfg, "additional_resources", null) != null ? local.cfg["additional_resources"] : []
 }
 
 output "current_config" {

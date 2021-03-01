@@ -113,7 +113,7 @@ data "kustomization_overlay" "current" {
     }
   }
 
-  resources = ["${path.module}/${local.variant}/"]
+  resources = concat(["${path.module}/${local.variant}/"], local.additional_resources)
 }
 
 resource "kustomization_resource" "p0" {

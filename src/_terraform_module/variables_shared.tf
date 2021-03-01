@@ -78,7 +78,8 @@ variable "configuration" {
         field_path = optional(string)
       }))
     })))
-    variant = optional(string)
+    variant              = optional(string)
+    additional_resources = optional(list(string))
   }))
   description = "Map with per workspace module configuration."
   default     = { apps = {}, ops = {}, loc = {} }
