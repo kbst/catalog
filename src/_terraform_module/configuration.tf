@@ -1,5 +1,5 @@
 module "configuration" {
-  source        = "github.com/kbst/terraform-kubestack//common/configuration?ref=7217deac6f587d9f48fd5f38e79e264861b67709"
+  source        = "github.com/kbst/terraform-kubestack//common/configuration?ref=5416c6ed2e14bee5af4ffff16e68595a37427425"
   configuration = var.configuration
   base_key      = var.configuration_base_key
 }
