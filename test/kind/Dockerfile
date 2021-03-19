@@ -26,6 +26,7 @@ RUN pip install --no-cache-dir pipenv &&\
     PIPENV_VENV_IN_PROJECT=true pipenv install
 
 COPY main.tf.tpl test.py .terraformrc /opt/test/
+COPY test-files /opt/test/test-files
 
 ENV PATH=/opt/.venv/bin:$PATH \
     KUBECONFIG=/opt/test/.kubeconfig \
