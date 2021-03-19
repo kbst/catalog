@@ -1,4 +1,23 @@
+FROM python:3.8 as tfbeta
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    gcc \
+    unzip
+
+RUN mkdir -p /opt/bin
+
+ARG TERRAFORM_VERSION=0.15.0-beta2
+RUN echo "TERRAFORM_VERSION: ${TERRAFORM_VERSION}" \
+    && curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /opt/bin \
+    && chmod +x /opt/bin/terraform \
+    && /opt/bin/terraform version
+
+
 FROM kubestack/framework:v0.12.2-beta.0-kind
+
+COPY --from=tfbeta /opt/bin/terraform /opt/bin/terraform
 
 COPY Pipfile Pipfile.lock /opt/
 WORKDIR /opt
