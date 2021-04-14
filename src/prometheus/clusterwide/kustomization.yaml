@@ -6,7 +6,7 @@ namespace: operator-prometheus
 commonAnnotations:
   catalog.kubestack.com/heritage: kubestack.com/catalog/prometheus
   catalog.kubestack.com/variant: clusterwide
-  app.kubernetes.io/version: v0.46.0
+  app.kubernetes.io/version: v0.47.0
 resources:
 - namespace.yaml
 - instance-cluster-role.yaml
