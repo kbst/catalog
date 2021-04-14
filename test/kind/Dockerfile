@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /opt/bin
 
-ARG TERRAFORM_VERSION=0.15.0-beta2
+ARG TERRAFORM_VERSION=0.15.0-rc2
 RUN echo "TERRAFORM_VERSION: ${TERRAFORM_VERSION}" \
     && curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /opt/bin \
