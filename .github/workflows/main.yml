@@ -93,7 +93,7 @@ jobs:
 
     # Deploy to cluster
     - name: Run test container
-      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-kind
+      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig -e KUBECONFIG_PATH=/opt/test/.kubeconfig test-kind
 
 
   #
