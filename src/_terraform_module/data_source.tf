@@ -115,25 +115,3 @@ data "kustomization_overlay" "current" {
 
   resources = concat(["${path.module}/${local.variant}/"], local.additional_resources)
 }
-
-resource "kustomization_resource" "p0" {
-  for_each = data.kustomization_overlay.current.ids_prio[0]
-
-  manifest = data.kustomization_overlay.current.manifests[each.value]
-}
-
-resource "kustomization_resource" "p1" {
-  for_each = data.kustomization_overlay.current.ids_prio[1]
-
-  manifest = data.kustomization_overlay.current.manifests[each.value]
-
-  depends_on = [kustomization_resource.p0]
-}
-
-resource "kustomization_resource" "p2" {
-  for_each = data.kustomization_overlay.current.ids_prio[2]
-
-  manifest = data.kustomization_overlay.current.manifests[each.value]
-
-  depends_on = [kustomization_resource.p1]
-}

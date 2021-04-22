@@ -1,12 +1,12 @@
 module "configuration" {
-  source        = "github.com/kbst/terraform-kubestack//common/configuration?ref=5416c6ed2e14bee5af4ffff16e68595a37427425"
+  source        = "github.com/kbst/terraform-kubestack//common/configuration?ref=v0.14.0-beta.1"
   configuration = var.configuration
   base_key      = var.configuration_base_key
 }
 
 locals {
   # current workspace config
-  cfg = lookup(module.configuration.merged, terraform.workspace, {})
+  cfg = lookup(module.configuration.merged, terraform.workspace)
 
   common_annotations = lookup(local.cfg, "common_annotations", null) # != null ? local.cfg["common_annotations"] : null
 
@@ -40,11 +40,7 @@ locals {
 
   vars = lookup(local.cfg, "vars", null) != null ? local.cfg["vars"] : []
 
-  variant = lookup(local.cfg, "variant", null) != null ? local.cfg["variant"] : var.variant
+  variant = lookup(local.cfg, "variant", null) != null ? local.cfg["variant"] : var.default_variant
 
   additional_resources = lookup(local.cfg, "additional_resources", null) != null ? local.cfg["additional_resources"] : []
-}
-
-output "current_config" {
-  value = local.cfg
 }

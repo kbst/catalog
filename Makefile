@@ -1,7 +1,10 @@
-_all: dist test-kustomize test-kind
+_all: test-terraform dist
 
-GITHUB_REF := $(shell echo "refs/heads/"`git rev-parse --abbrev-ref HEAD`)
-GITHUB_SHA := $(shell echo `git rev-parse --verify HEAD^{commit}`)
+GITHUB_REF ?= $(shell echo "refs/heads/"`git rev-parse --abbrev-ref HEAD`)
+GITHUB_SHA ?= $(shell echo `git rev-parse --verify HEAD^{commit}`)
+
+test-terraform:
+	cd src/_terraform_module/; terraform test
 
 dist:
 	docker build -t catalog:dist-${GITHUB_SHA} .github/actions/builder

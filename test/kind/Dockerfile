@@ -7,10 +7,10 @@ RUN pip install --no-cache-dir pipenv &&\
     PIPENV_VENV_IN_PROJECT=true pipenv install
 
 COPY main.tf.tpl test.py /opt/test/
-COPY test-files /opt/test/test-files
 
 ENV PATH=/opt/.venv/bin:$PATH \
-    KUBECONFIG=/opt/test/.kubeconfig
+    KUBECONFIG=/opt/test/.kubeconfig \
+    KUBECONFIG_PATH=/opt/test/.kubeconfig
 
 WORKDIR /opt/test
 CMD ["nosetests", "-s", "--logging-level", "WARNING", "test.py"]

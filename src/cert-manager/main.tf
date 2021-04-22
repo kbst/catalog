@@ -1,1 +1,1 @@
-../_terraform_module/main.tf
+../_terraform_module/main._tf
