@@ -1,2 +1,3 @@
 url: https://github.com/bitnami-labs/sealed-secrets.git
+ref: main
 filter_tags: ^v([0-9.]+)$
