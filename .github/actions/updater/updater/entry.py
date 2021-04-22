@@ -60,7 +60,10 @@ class Entry():
         if not self.metadata:
             return
 
-        self.repo = clone_or_reset_repo(self.name, self.metadata['url'])
+        self.repo = clone_or_reset_repo(
+            self.name,
+            self.metadata.get('url'),
+            self.metadata.get('ref', 'master'))
         entry_tags = sorted(self.repo.tags,
                             key=lambda x: self.get_tag_date(x))
         if not entry_tags:
@@ -68,8 +71,8 @@ class Entry():
 
         catalog_tags = self.catalog.repo.tags
         self.releases = list(filter(
-                                lambda x: str(x).startswith(self.name),
-                                catalog_tags))
+            lambda x: str(x).startswith(self.name),
+            catalog_tags))
 
         latest_release = None
         self.latest_release_date = 0
