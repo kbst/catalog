@@ -7,7 +7,7 @@ module "test" {
     }
 
     ops = {}
-    
+
     default = {}
   }
 }
