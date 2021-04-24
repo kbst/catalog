@@ -12,7 +12,7 @@ from kubernetes import client, config
 
 DISTDIR = "/_dist"
 TESTDIR = TemporaryDirectory()
-TIMEOUT = 180  # 3 minutes in seconds
+TIMEOUT = 300  # 5 minutes in seconds
 
 
 def run_cmd(name, cmd, timeout):
