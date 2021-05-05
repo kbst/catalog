@@ -1,114 +1,114 @@
 data "kustomization_overlay" "current" {
-  common_annotations = local.common_annotations
+  common_annotations = local.cfg["common_annotations"]
 
-  common_labels = local.common_labels
+  common_labels = local.cfg["common_labels"]
 
-  components = local.components
+  components = local.cfg["components"]
 
   dynamic "config_map_generator" {
-    for_each = local.config_map_generator
+    for_each = local.cfg["config_map_generator"] != null ? local.cfg["config_map_generator"] : []
     iterator = i
     content {
-      name      = lookup(i.value, "name", null)
-      namespace = lookup(i.value, "namespace", null)
-      behavior  = lookup(i.value, "behavior", null)
-      envs      = lookup(i.value, "envs", null)
-      files     = lookup(i.value, "files", null)
-      literals  = lookup(i.value, "literals", null)
+      name      = i.value["name"]
+      namespace = i.value["namespace"]
+      behavior  = i.value["behavior"]
+      envs      = i.value["envs"]
+      files     = i.value["files"]
+      literals  = i.value["literals"]
       options {
-        labels                   = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "labels", null) : null
-        annotations              = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "annotations", null) : null
-        disable_name_suffix_hash = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "disable_name_suffix_hash", false) : false
+        labels                   = lookup(i.value, "options") != null ? i.value["options"]["labels"] : null
+        annotations              = lookup(i.value, "options") != null ? i.value["options"]["annotations"] : null
+        disable_name_suffix_hash = lookup(i.value, "options") != null ? i.value["options"]["disable_name_suffix_hash"] : null
       }
     }
   }
 
-  crds = local.crds
+  crds = local.cfg["crds"]
 
-  generators = local.generators
+  generators = local.cfg["generators"]
 
   dynamic "generator_options" {
-    for_each = local.generator_options != null ? [local.generator_options] : []
+    for_each = local.cfg["generator_options"] != null ? [local.cfg["generator_options"]] : []
     iterator = i
     content {
-      labels                   = lookup(i.value, "labels", null)
-      annotations              = lookup(i.value, "annotations", null)
-      disable_name_suffix_hash = lookup(i.value, "disable_name_suffix_hash", false)
+      labels                   = i.value["labels"]
+      annotations              = i.value["annotations"]
+      disable_name_suffix_hash = i.value["disable_name_suffix_hash"]
     }
   }
 
   dynamic "images" {
-    for_each = local.images
+    for_each = lookup(local.cfg, "images") != null ? lookup(local.cfg, "images") : []
     iterator = i
     content {
-      name     = lookup(i.value, "name", null)
-      new_name = lookup(i.value, "new_name", null)
-      new_tag  = lookup(i.value, "new_tag", null)
-      digest   = lookup(i.value, "digest", null)
+      name     = i.value["name"]
+      new_name = i.value["new_name"]
+      new_tag  = i.value["new_tag"]
+      digest   = i.value["digest"]
     }
   }
 
-  name_prefix = local.name_prefix
+  name_prefix = local.cfg["name_prefix"]
 
-  namespace = local.namespace
+  namespace = local.cfg["namespace"]
 
-  name_suffix = local.name_suffix
+  name_suffix = local.cfg["name_suffix"]
 
   dynamic "patches" {
-    for_each = local.patches
+    for_each = local.cfg["patches"] != null ? local.cfg["patches"] : []
     iterator = i
     content {
-      path   = lookup(i.value, "path", null)
-      patch  = lookup(i.value, "patch", null)
-      target = lookup(i.value, "target", null) != null ? i.value["target"] : {}
+      path   = i.value["path"]
+      patch  = i.value["patch"]
+      target = i.value["target"]
     }
   }
 
   dynamic "replicas" {
-    for_each = local.replicas
+    for_each = local.cfg["replicas"] != null ? local.cfg["replicas"] : []
     iterator = i
     content {
-      name  = lookup(i.value, "name", null)
-      count = lookup(i.value, "count", null)
+      name  = i.value["name"]
+      count = i.value["count"]
     }
   }
 
   dynamic "secret_generator" {
-    for_each = local.secret_generator
+    for_each = local.cfg["secret_generator"] != null ? local.cfg["secret_generator"] : []
     iterator = i
     content {
-      name      = lookup(i.value, "name", null)
-      namespace = lookup(i.value, "namespace", null)
-      behavior  = lookup(i.value, "behavior", null)
-      type      = lookup(i.value, "type", null)
-      envs      = lookup(i.value, "envs", null)
-      files     = lookup(i.value, "files", null)
-      literals  = lookup(i.value, "literals", null)
+      name      = i.value["name"]
+      namespace = i.value["namespace"]
+      behavior  = i.value["behavior"]
+      type      = i.value["type"]
+      envs      = i.value["envs"]
+      files     = i.value["files"]
+      literals  = i.value["literals"]
       options {
-        labels                   = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "labels", null) : null
-        annotations              = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "annotations", null) : null
-        disable_name_suffix_hash = lookup(i.value, "options", null) != null ? lookup(i.value["options"], "disable_name_suffix_hash", false) : false
+        labels                   = lookup(i.value, "options") != null ? i.value["options"]["labels"] : null
+        annotations              = lookup(i.value, "options") != null ? i.value["options"]["annotations"] : null
+        disable_name_suffix_hash = lookup(i.value, "options") != null ? i.value["options"]["disable_name_suffix_hash"] : null
       }
     }
   }
 
-  transformers = local.transformers
+  transformers = local.cfg["transformers"]
 
   dynamic "vars" {
-    for_each = local.vars
+    for_each = local.cfg["vars"] != null ? local.cfg["vars"] : []
     iterator = i
     content {
-      name = lookup(i.value, "name", null)
+      name = i.value["name"]
       obj_ref = {
-        api_version = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "api_version", null) : null
-        group       = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "group", null) : null
-        version     = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "version", null) : null
-        kind        = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "kind", null) : null
-        name        = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "name", null) : null
-        namespace   = lookup(i.value, "obj_ref", null) != null ? lookup(i.value["obj_ref"], "namespace", null) : null
+        api_version = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["api_version"] : null
+        group       = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["group"] : null
+        version     = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["version"] : null
+        kind        = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["kind"] : null
+        name        = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["name"] : null
+        namespace   = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["namespace"] : null
       }
       field_ref = {
-        field_path = lookup(i.value, "field_ref", null) != null ? lookup(i.value["field_ref"], "field_path", null) : null
+        field_path = lookup(i.value, "field_ref") != null ? i.value["field_ref"]["field_path"] : null
       }
     }
   }
