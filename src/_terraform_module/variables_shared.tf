@@ -1,5 +1,19 @@
 variable "configuration" {
   type = map(object({
+    # Variant is specific to these modules
+    # it selects which of the bundled Kustomizations
+    # to include in the resources list.
+    # Each module has a default_variant
+    variant = optional(string)
+
+    # Modules don't expose Kustomization's resource
+    # attribute, but only allow adding additional
+    # resources to the list
+    additional_resources = optional(list(string))
+
+    # Below are all Kustomization built-in
+    # attributes that modules pass through to the
+    # kustomizatoin_overlay data source
     common_annotations = optional(map(string))
     common_labels      = optional(map(string))
     components         = optional(list(string))
@@ -78,8 +92,6 @@ variable "configuration" {
         field_path = optional(string)
       }))
     })))
-    variant              = optional(string)
-    additional_resources = optional(list(string))
   }))
   description = "Map with per workspace module configuration."
   default     = { apps = {}, ops = {}, loc = {} }

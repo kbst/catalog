@@ -8,7 +8,7 @@ locals {
   # current workspace config
   cfg = lookup(module.configuration.merged, terraform.workspace)
 
-  variant = local.cfg["variant"] != null ? local.cfg["variant"] : var.default_variant
+  variant = local.cfg["variant"] != null ? local.cfg["variant"] : local.default_variant
 
   additional_resources = local.cfg["additional_resources"] != null ? local.cfg["additional_resources"] : []
 }
