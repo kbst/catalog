@@ -6,13 +6,11 @@ from os import listdir
 from os.path import isdir, isfile, join, abspath
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
-from nose import with_setup
 from shutil import unpack_archive
 from kubernetes import client, config
 from jinja2 import Environment, FileSystemLoader
 
 DISTDIR = "/_dist"
-TESTDIR = TemporaryDirectory()
 TIMEOUT = 300  # 5 minutes in seconds
 
 
@@ -123,43 +121,30 @@ def run_steps(name, path):
             wait_retries(name, TIMEOUT)
 
 
-def setup():
-    # unpack zip archives in DISTDIR
-    for name in listdir(DISTDIR):
-        path = join(DISTDIR, name)
-        if not isfile(path) and not path.endswith(".zip"):
-            continue
-
-        unpack_archive(path, TESTDIR.name, "zip")
-
-
-def teardown():
-    TESTDIR.cleanup()
-
-
-@with_setup(setup, teardown)
 def test_variants():
-    root_module = TESTDIR.name
-    for entry in listdir(TESTDIR.name):
-        entry_module = join(TESTDIR.name, entry)
-        if not isdir(entry_module):
+    for name in listdir(DISTDIR):
+        if not isfile(name) and (not name.startswith('module-') or not name.endswith('.zip')):
             continue
 
-        for variant in listdir(entry_module):
-            variant_path = join(entry_module, variant)
-            if not isdir(variant_path):
-                continue
+        with TemporaryDirectory() as root:
+            mut = join(root, "mut")
+            archive = join(DISTDIR, name)
+            unpack_archive(archive, mut, "zip")
+            for variant in listdir(mut):
+                variant_path = join(mut, variant)
+                if not isdir(variant_path):
+                    continue
 
-            # write main.tf into root_module
-            jinja = Environment(loader=FileSystemLoader("."))
-            template = jinja.get_template('main.tf.tpl')
-            data = template.render(
-                {'entry_module': entry_module, 'variant': variant})
+                # write main.tf into root_module
+                jinja = Environment(loader=FileSystemLoader("."))
+                template = jinja.get_template('main.tf.tpl')
+                data = template.render(
+                    {'entry_module': mut, 'variant': variant})
 
-            with open(f'{root_module}/main.tf', 'w') as f:
-                f.write(data)
-                # always include newline at end of file
-                f.write('\n')
+                with open(f'{root}/main.tf', 'w') as f:
+                    f.write(data)
+                    # always include newline at end of file
+                    f.write('\n')
 
-            # yield instructs nose to treat each variant as a separate test
-            yield run_steps, f"{entry}/{variant}", root_module
+                # yield instructs nose to treat each variant as a separate test
+                yield run_steps, f"{name} - {variant}", root

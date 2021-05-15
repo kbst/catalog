@@ -7,14 +7,25 @@ from sys import exit
 
 
 def create_archive(name, version):
-    archive_src = join(SRCDIR, name)
+    src = join(SRCDIR, name)
+
+    # legacy format artifacts
     archive_dist = join(DISTDIR, name)
     archive = join(DISTDIR, f'{name}-{version}')
 
-    copytree(archive_src, archive_dist, ignore=ignore_patterns('_*'))
+    copytree(src, archive_dist, ignore=ignore_patterns('_*', '*.tf'))
 
     make_archive(archive, 'zip', DISTDIR, name)
     print(f"[INFO] created `{archive}.zip`")
+
+    # terraform module artifacts
+    module_dist = join(DISTDIR, f'module-{name}')
+    module = join(DISTDIR, f'module-{name}-{version}')
+
+    copytree(src, module_dist, ignore=ignore_patterns('_*'))
+
+    make_archive(module, 'zip', module_dist)
+    print(f"[INFO] created `{module}.zip`")
 
 
 def get_build_targets(ref):
