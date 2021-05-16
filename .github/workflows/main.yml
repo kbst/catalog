@@ -166,7 +166,9 @@ jobs:
             set +e
             while true
             do
-                gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip && break
+                gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip &&\
+                gsutil cp gs://dev.catalog.kubestack.com/module-${NAME}.zip gs://catalog.kubestack.com/module-${NAME}.zip &&\
+                break
                 sleep 15
             done
 
@@ -175,3 +177,4 @@ jobs:
       run: |
             export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
             wget https://storage.googleapis.com/catalog.kubestack.com/${NAME}.zip
+            wget https://storage.googleapis.com/catalog.kubestack.com/module-${NAME}.zip
