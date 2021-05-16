@@ -34,7 +34,11 @@ class Catalog():
 
     def get_variants(self, entry):
         entry_dir = path.join(self.get_src_dir(), entry.name)
-        return sorted([n for n in listdir(entry_dir) if not n.startswith('_')])
+        variants = []
+        for v in listdir(entry_dir):
+            if path.isdir(v) and not v.startswith('_'):
+                variants.append(v)
+        return sorted(variants)
 
     def run_script(self, entry, target_path):
         run_script_path = path.join(target_path, '_updater', 'run.sh')
