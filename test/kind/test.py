@@ -6,18 +6,17 @@ from os import listdir
 from os.path import isdir, isfile, join, abspath
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
-from nose import with_setup
 from shutil import unpack_archive
 from kubernetes import client, config
+from jinja2 import Environment, FileSystemLoader
 
 DISTDIR = "/_dist"
-TESTDIR = TemporaryDirectory()
 TIMEOUT = 300  # 5 minutes in seconds
 
 
-def run_cmd(name, cmd, timeout):
+def run_cmd(name, path, cmd, timeout):
     start = time.time()
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, cwd=path, stdout=PIPE, stderr=PIPE)
     while True:
         # we give up
         if (time.time() - start) >= timeout:
@@ -98,56 +97,54 @@ def wait_retries(name, timeout):
 
 
 def run_steps(name, path):
-    tfvar_arg = f"--var=path={path}"
     steps = {
+        "init": {"type": "run_cmd",
+                 "path": path,
+                 "cmd": ["terraform", "init"]},
         "apply": {"type": "run_cmd",
+                          "path": path,
                           "cmd": ["terraform",
                                   "apply",
-                                  "--auto-approve",
-                                  "--parallelism=40",
-                                  tfvar_arg]},
+                                  "--auto-approve"]},
         "wait": {"type": "wait_retries"},
         "destroy": {"type": "run_cmd",
+                            "path": path,
                             "cmd": ["terraform",
                                     "destroy",
-                                    "--auto-approve",
-                                    tfvar_arg]}
+                                    "--auto-approve"]}
     }
 
     for step in steps.values():
         if step["type"] == "run_cmd":
-            run_cmd(name, step["cmd"], TIMEOUT)
+            run_cmd(name, step["path"], step["cmd"], TIMEOUT)
         if step["type"] == "wait_retries":
             wait_retries(name, TIMEOUT)
 
 
-def setup():
-    # unpack zip archives in DISTDIR
-    for name in listdir(DISTDIR):
-        path = join(DISTDIR, name)
-        if not isfile(path) and not path.endswith(".zip"):
-            continue
-
-        unpack_archive(path, TESTDIR.name, "zip")
-
-    run_cmd("init", ["terraform", "init"], TIMEOUT)
-
-
-def teardown():
-    TESTDIR.cleanup()
-
-
-@with_setup(setup, teardown)
 def test_variants():
-    for entry in listdir(TESTDIR.name):
-        entry_path = join(TESTDIR.name, entry)
-        if not isdir(entry_path):
+    for name in listdir(DISTDIR):
+        if not isfile(name) and (not name.startswith('module-') or not name.endswith('.zip')):
             continue
 
-        for overlay in listdir(entry_path):
-            overlay_path = join(entry_path, overlay)
-            if not isdir(overlay_path):
-                continue
+        with TemporaryDirectory() as root:
+            mut = join(root, "mut")
+            archive = join(DISTDIR, name)
+            unpack_archive(archive, mut, "zip")
+            for variant in listdir(mut):
+                variant_path = join(mut, variant)
+                if not isdir(variant_path):
+                    continue
 
-            # yield instructs nose to treat each variant as a separate test
-            yield run_steps, f"{entry}/{overlay}", overlay_path
+                # write main.tf into root_module
+                jinja = Environment(loader=FileSystemLoader("."))
+                template = jinja.get_template('main.tf.tpl')
+                data = template.render(
+                    {'entry_module': mut, 'variant': variant})
+
+                with open(f'{root}/main.tf', 'w') as f:
+                    f.write(data)
+                    # always include newline at end of file
+                    f.write('\n')
+
+                # yield instructs nose to treat each variant as a separate test
+                yield run_steps, f"{name} - {variant}", root

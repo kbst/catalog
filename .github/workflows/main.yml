@@ -7,6 +7,9 @@ on:
     tags:
     - "*"  # run for tags
 
+env:
+  TERRAFORM_VERSION: "0.15.3"
+
 jobs:
 
 
@@ -29,6 +32,28 @@ jobs:
       with:
         name: _dist
         path: _dist/*.zip
+
+
+  #
+  #
+  # Test `kustomize build`
+  test-terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout
+    - uses: actions/checkout@v1
+
+    # Setup Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1.2.1
+      with:
+        terraform_wrapper: false
+        terraform_version: "${{ env.TERRAFORM_VERSION }}"
+
+    # Run tests
+    - name: Run tests
+      run: make test-terraform
 
 
   #
@@ -101,7 +126,7 @@ jobs:
   #
   publish:
     runs-on: ubuntu-latest
-    needs: [test-kustomize, test-kind]
+    needs: [test-kustomize, test-kind, test-terraform]
 
     steps:
     # Download build artifacts
