@@ -6,9 +6,13 @@ variable "configuration" {
     # Each module has a default_variant
     variant = optional(string)
 
-    # Modules don't expose Kustomization's resource
-    # attribute, but only allow adding additional
-    # resources to the list
+    # if set, will overwrite all of the module's
+    # upstream resources, only useful in edge cases
+    # see additional_resources instead
+    resources = optional(list(string))
+
+    # concat additional resources to the list of
+    # included upstream resources
     additional_resources = optional(list(string))
 
     # Below are all Kustomization built-in

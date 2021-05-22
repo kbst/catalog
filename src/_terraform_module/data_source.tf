@@ -113,5 +113,5 @@ data "kustomization_overlay" "current" {
     }
   }
 
-  resources = concat(["${path.module}/${local.variant}/"], local.additional_resources)
+  resources = local.cfg["resources"] != null ? local.cfg["resources"] : concat(["${path.module}/${local.variant}/"], local.additional_resources)
 }
