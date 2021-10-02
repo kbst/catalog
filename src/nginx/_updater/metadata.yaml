@@ -1,2 +1,3 @@
 url: https://github.com/kubernetes/ingress-nginx.git
+ref: main
 filter_tags: ^controller-(.*)
