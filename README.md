@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">Kubestack Catalog</h1>
-<h3 align="center">Catalog for the Kubestack Gitops Framework</h3>
+<h3 align="center">Manifest Catalog for the Kubestack Gitops Framework</h3>
 
 <div align="center">
 
@@ -48,8 +48,6 @@ For the easiest way to get started, [visit the official Kubestack quickstart](ht
     * Set-up cloud prerequisites and bootstrap Kubestack's environment and clusters on your cloud provider for the first time.
 4. Set-up Automation
     * Integrate CI/CD to automate changes following Kubestack's GitOps workflow.
-
-See the [`tests`](./tests) directory for an example of how to extend this towards multi-cluster and/or multi-cloud.
 
 
 ## Getting Help
