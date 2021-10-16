@@ -1,11 +1,11 @@
-FROM python:3 as base
+FROM python:3.8 as base
 
 #
 #
 # tmp image to handle kustomize changing release artifacts
 FROM base as tmp
 
-ARG KUSTOMIZE_VERSION=3.8.1
+ARG KUSTOMIZE_VERSION=4.4.0
 
 WORKDIR /tmp
 
