@@ -88,18 +88,18 @@ resource "test_assertions" "from_base_merge" {
 
   check "key_exists_from_base_merge" {
     description = "key_exists_from_base_merge"
-    condition   = contains(keys(local.manifests["~G_v1_ConfigMap|test-cmgen|test"].data), local.test_key)
+    condition   = contains(keys(local.manifests["_/ConfigMap/test-cmgen/test"].data), local.test_key)
   }
 
   equal "value_correct_from_base_merge" {
     description = "value_correct_from_base_merge"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test"].data[local.test_key]
+    got         = local.manifests["_/ConfigMap/test-cmgen/test"].data[local.test_key]
     want        = local.test_value
   }
 
   equal "annotation_correct_from_base_merge" {
     description = "annotation_correct_from_base_merge"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test"].metadata.annotations["source"]
+    got         = local.manifests["_/ConfigMap/test-cmgen/test"].metadata.annotations["source"]
     want        = "from_base_merged"
   }
 }
@@ -109,18 +109,18 @@ resource "test_assertions" "from_literal" {
 
   check "key_exists_from_literal" {
     description = "key_exists_from_literal"
-    condition   = contains(keys(local.manifests["~G_v1_ConfigMap|test-cmgen|test-literal-cc854d6db8"].data), local.test_key)
+    condition   = contains(keys(local.manifests["_/ConfigMap/test-cmgen/test-literal-cc854d6db8"].data), local.test_key)
   }
 
   equal "value_correct_from_literal" {
     description = "value_correct_from_literal"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test-literal-cc854d6db8"].data[local.test_key]
+    got         = local.manifests["_/ConfigMap/test-cmgen/test-literal-cc854d6db8"].data[local.test_key]
     want        = local.test_value
   }
 
   equal "annotation_correct_from_base_merge" {
     description = "annotation_correct_from_base_merge"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test-literal-cc854d6db8"].metadata.labels.source
+    got         = local.manifests["_/ConfigMap/test-cmgen/test-literal-cc854d6db8"].metadata.labels.source
     want        = "from_literal"
   }
 }
@@ -130,12 +130,12 @@ resource "test_assertions" "from_envs" {
 
   check "key_exists_from_envs" {
     description = "key_exists_from_envs"
-    condition   = contains(keys(local.manifests["~G_v1_ConfigMap|test-cmgen|test-envs"].data), upper(local.test_key))
+    condition   = contains(keys(local.manifests["_/ConfigMap/test-cmgen/test-envs"].data), upper(local.test_key))
   }
 
   equal "value_correct_from_envs" {
     description = "value_correct_from_envs"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test-envs"].data[upper(local.test_key)]
+    got         = local.manifests["_/ConfigMap/test-cmgen/test-envs"].data[upper(local.test_key)]
     want        = local.test_value
   }
 }
@@ -145,12 +145,12 @@ resource "test_assertions" "from_files" {
 
   check "key_exists_from_files" {
     description = "key_exists_from_files"
-    condition   = contains(keys(local.manifests["~G_v1_ConfigMap|test-cmgen|test-files-k7fk56g6g8"].data), local.test_file)
+    condition   = contains(keys(local.manifests["_/ConfigMap/test-cmgen/test-files-k7fk56g6g8"].data), local.test_file)
   }
 
   equal "value_correct_from_files" {
     description = "value_correct_from_files"
-    got         = local.manifests["~G_v1_ConfigMap|test-cmgen|test-files-k7fk56g6g8"].data[local.test_file]
+    got         = local.manifests["_/ConfigMap/test-cmgen/test-files-k7fk56g6g8"].data[local.test_file]
     want        = file("${path.module}/${local.test_file}")
   }
 }

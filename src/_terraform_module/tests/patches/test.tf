@@ -46,7 +46,7 @@ resource "test_assertions" "patches_deployment_resources" {
 
   equal "resources_are_correct" {
     description = "resources_are_correct"
-    got         = local.manifests["apps_v1_Deployment|test|test"].spec.template.spec.containers[0].resources
+    got         = local.manifests["apps/Deployment/test/test"].spec.template.spec.containers[0].resources
     want = {
       limits = {
         cpu    = "100m"
@@ -65,6 +65,6 @@ resource "test_assertions" "patches_rename_configmap" {
 
   check "changed_configmap_name_in_manifests" {
     description = "changed_configmap_name_in_manifests"
-    condition   = contains(keys(local.manifests), "~G_v1_ConfigMap|test|newname")
+    condition   = contains(keys(local.manifests), "_/ConfigMap/test/newname")
   }
 }

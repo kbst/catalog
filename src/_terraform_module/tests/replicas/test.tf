@@ -28,7 +28,7 @@ resource "test_assertions" "replicas" {
 
   equal "replicas_is_correct" {
     description = "replicas_is_correct"
-    got         = jsondecode(module.mut.manifests["apps_v1_Deployment|test|test"]).spec.replicas
+    got         = jsondecode(module.mut.manifests["apps/Deployment/test/test"]).spec.replicas
     want        = 3
   }
 }

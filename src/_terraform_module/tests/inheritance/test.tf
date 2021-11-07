@@ -27,13 +27,13 @@ resource "test_assertions" "from_upstream" {
 
   equal "namespace_name_changed" {
     description = "namespace_name_changed"
-    got         = jsondecode(module.mut_upstream.manifests["~G_v1_Namespace|~X|from-upstream"]).metadata.name
+    got         = jsondecode(module.mut_upstream.manifests["_/Namespace/_/from-upstream"]).metadata.name
     want        = "from-upstream"
   }
 
   equal "deployment_has_prefix_and_suffix" {
     description = "deployment_has_prefix_and_suffix"
-    got         = jsondecode(module.mut_upstream.manifests["apps_v1_Deployment|from-upstream|pre-test-suf"]).metadata.name
+    got         = jsondecode(module.mut_upstream.manifests["apps/Deployment/from-upstream/pre-test-suf"]).metadata.name
     want        = "pre-test-suf"
   }
 }
@@ -59,7 +59,7 @@ resource "test_assertions" "from_workspace" {
 
   equal "configuration_gets_overwritten_by_workspace" {
     description = "configuration_gets_overwritten_by_workspace"
-    got         = jsondecode(module.mut_workspace.manifests["~G_v1_Namespace|~X|from-workspace"]).metadata.name
+    got         = jsondecode(module.mut_workspace.manifests["_/Namespace/_/from-workspace"]).metadata.name
     want        = "from-workspace"
   }
 }

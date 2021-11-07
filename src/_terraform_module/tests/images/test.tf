@@ -29,7 +29,7 @@ resource "test_assertions" "images" {
 
   equal "image_is_correct" {
     description = "image_is_correct"
-    got         = jsondecode(module.mut.manifests["apps_v1_Deployment|test|test"]).spec.template.spec.containers[0].image
+    got         = jsondecode(module.mut.manifests["apps/Deployment/test/test"]).spec.template.spec.containers[0].image
     want        = "new_name:new_tag"
   }
 }
