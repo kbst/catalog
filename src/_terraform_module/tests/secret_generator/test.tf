@@ -76,18 +76,18 @@ resource "test_assertions" "from_literal" {
 
   check "key_exists_from_literal" {
     description = "key_exists_from_literal"
-    condition   = contains(keys(local.manifests["~G_v1_Secret|test-secgen|test-literal-9kf247ck92"].data), local.test_key)
+    condition   = contains(keys(local.manifests["_/Secret/test-secgen/test-literal-9kf247ck92"].data), local.test_key)
   }
 
   equal "value_correct_from_literal" {
     description = "value_correct_from_literal"
-    got         = local.manifests["~G_v1_Secret|test-secgen|test-literal-9kf247ck92"].data[local.test_key]
+    got         = local.manifests["_/Secret/test-secgen/test-literal-9kf247ck92"].data[local.test_key]
     want        = base64encode(local.test_value)
   }
 
   equal "annotation_correct_from_base_merge" {
     description = "annotation_correct_from_base_merge"
-    got         = local.manifests["~G_v1_Secret|test-secgen|test-literal-9kf247ck92"].metadata.labels.source
+    got         = local.manifests["_/Secret/test-secgen/test-literal-9kf247ck92"].metadata.labels.source
     want        = "from_literal"
   }
 }
@@ -97,12 +97,12 @@ resource "test_assertions" "from_envs" {
 
   check "key_exists_from_envs" {
     description = "key_exists_from_envs"
-    condition   = contains(keys(local.manifests["~G_v1_Secret|test-secgen|test-envs"].data), upper(local.test_key))
+    condition   = contains(keys(local.manifests["_/Secret/test-secgen/test-envs"].data), upper(local.test_key))
   }
 
   equal "value_correct_from_envs" {
     description = "value_correct_from_envs"
-    got         = local.manifests["~G_v1_Secret|test-secgen|test-envs"].data[upper(local.test_key)]
+    got         = local.manifests["_/Secret/test-secgen/test-envs"].data[upper(local.test_key)]
     want        = base64encode(local.test_value)
   }
 }
@@ -112,12 +112,12 @@ resource "test_assertions" "from_files" {
 
   check "key_exists_from_files" {
     description = "key_exists_from_files"
-    condition   = contains(keys(local.manifests["~G_v1_Secret|test-secgen|test-files-49cdkh47f9"].data), local.test_file)
+    condition   = contains(keys(local.manifests["_/Secret/test-secgen/test-files-49cdkh47f9"].data), local.test_file)
   }
 
   equal "value_correct_from_files" {
     description = "value_correct_from_files"
-    got         = local.manifests["~G_v1_Secret|test-secgen|test-files-49cdkh47f9"].data[local.test_file]
+    got         = local.manifests["_/Secret/test-secgen/test-files-49cdkh47f9"].data[local.test_file]
     want        = base64encode(file("${path.module}/${local.test_file}"))
   }
 }

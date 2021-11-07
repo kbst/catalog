@@ -25,7 +25,7 @@ resource "test_assertions" "common_annotations" {
 
   equal "metadata_annotations_is_correct" {
     description = "metadata_annotations_is_correct"
-    got         = jsondecode(module.mut.manifests["~G_v1_Namespace|~X|test"]).metadata.annotations
+    got         = jsondecode(module.mut.manifests["_/Namespace/_/test"]).metadata.annotations
     want = {
       "terraform-workspace" = terraform.workspace
     }
