@@ -1,2 +1,3 @@
 url: https://github.com/coreos/prometheus-operator.git
+ref: main
 filter_tags: ^v(.+)
