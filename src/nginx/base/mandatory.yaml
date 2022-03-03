@@ -421,7 +421,6 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
   name: nginx
-  namespace: ingress-nginx
 spec:
   controller: k8s.io/ingress-nginx
 ---
