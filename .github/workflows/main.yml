@@ -8,7 +8,7 @@ on:
     - "*"  # run for tags
 
 env:
-  TERRAFORM_VERSION: "1.0.9"
+  TERRAFORM_VERSION: "1.1.7"
 
 jobs:
 
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.0.0
 
     # Run builder
     - name: Run builder
@@ -28,7 +28,7 @@ jobs:
 
     # Upload artifacts
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3.0.0
       with:
         name: _dist
         path: _dist/*.zip
@@ -42,11 +42,11 @@ jobs:
 
     steps:
     # Checkout
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.0.0
 
     # Setup Terraform
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1.2.1
+      uses: hashicorp/setup-terraform@v1.3.2
       with:
         terraform_wrapper: false
         terraform_version: "${{ env.TERRAFORM_VERSION }}"
@@ -63,16 +63,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        kustomize-version: ["4.4.0"]
+        kustomize-version: ["4.5.2"]
     needs: build
 
     steps:
     # Checkout
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.0.0
 
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3.0.0
       with:
         name: _dist
         path: _dist
@@ -97,13 +97,14 @@ jobs:
 
     steps:
     # Checkout
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.0.0
 
     # Setup Kind
     - uses: engineerd/setup-kind@v0.5.0
       with:
         version: "v0.11.1"
         config: test/kind/kind-config.yaml
+        image: kindest/node:v1.22.5
 
     # Download build artifacts
     - name: 'Download build-artifacts'
@@ -131,13 +132,13 @@ jobs:
     steps:
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3.0.0
       with:
         name: _dist
         path: _dist
 
     # Upload archive
-    - uses: google-github-actions/setup-gcloud@v0.2.0
+    - uses: google-github-actions/setup-gcloud@v0.5.1
       with:
         service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
@@ -156,7 +157,7 @@ jobs:
 
     steps:
     # Setup gcloud CLI
-    - uses: google-github-actions/setup-gcloud@v0.2.0
+    - uses: google-github-actions/setup-gcloud@v0.5.1
       with:
         service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
