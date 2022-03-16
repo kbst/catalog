@@ -90,8 +90,8 @@ jobs:
 
   #
   #
-  # Test deploy to KinD
-  test-kind:
+  # Test deploy to k3d
+  test-k3d:
     runs-on: ubuntu-latest
     needs: build
 
@@ -99,12 +99,14 @@ jobs:
     # Checkout
     - uses: actions/checkout@v3.0.0
 
-    # Setup Kind
-    - uses: engineerd/setup-kind@v0.5.0
+    # Setup k3d
+    - name: Setup k3d
+      uses: rinx/setup-k3d@v0.0.3
       with:
-        version: "v0.11.1"
-        config: test/kind/kind-config.yaml
-        image: kindest/node:v1.22.5
+        skipClusterCreation: true
+
+    - name: Create k3d cluster
+      run: make k3d
 
     # Download build artifacts
     - name: 'Download build-artifacts'
@@ -115,11 +117,11 @@ jobs:
 
     # Build test image
     - name: Build test image
-      run: docker build -t test-kind test/kind/
+      run: docker build -t test-k3d test/k3d/
 
     # Deploy to cluster
     - name: Run test container
-      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-kind
+      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-k3d
 
 
   #
@@ -127,7 +129,7 @@ jobs:
   #
   publish:
     runs-on: ubuntu-latest
-    needs: [test-kustomize, test-kind, test-terraform]
+    needs: [test-kustomize, test-k3d, test-terraform]
 
     steps:
     # Download build artifacts

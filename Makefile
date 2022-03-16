@@ -8,12 +8,17 @@ test-terraform:
 
 dist:
 	docker build -t catalog:dist-${GITHUB_SHA} .github/actions/builder
-	docker run --rm -v `pwd`:/workdir:z --workdir=/workdir -e GITHUB_REF=${GITHUB_REF} -e GITHUB_SHA=${GITHUB_SHA} catalog:dist-${GITHUB_SHA} 
+	docker run --rm -v `pwd`:/workdir:z --workdir=/workdir -e GITHUB_REF=${GITHUB_REF} -e GITHUB_SHA=${GITHUB_SHA} catalog:dist-${GITHUB_SHA}
 
 test-kustomize: dist
 	docker build -t catalog:test-kustomize-${GITHUB_SHA} test/kustomize/
 	docker run --rm -v `pwd`/_dist:/_dist:z catalog:test-kustomize-${GITHUB_SHA}
 
+k3d:
+	k3d cluster delete catalog-tests
+	k3d cluster create catalog-tests -s 1 -a 3 --no-lb --k3s-arg "--disable=traefik@server:*" --k3s-arg "--disable=servicelb@server:*" --k3s-arg="--node-label=ingress-ready=true@agent:*"
+	kubectl config use-context k3d-catalog-tests
+	kubectl cluster-info
 
 test-kind: dist
 	docker build -t catalog:test-kind-${GITHUB_SHA} test/kind/
