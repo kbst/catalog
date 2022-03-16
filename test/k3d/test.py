@@ -11,7 +11,7 @@ from kubernetes import client, config
 from jinja2 import Environment, FileSystemLoader
 
 DISTDIR = "/_dist"
-TIMEOUT = 300  # 5 minutes in seconds
+TIMEOUT = 600  # 10 minutes in seconds
 
 
 def run_cmd(name, path, cmd, timeout):
