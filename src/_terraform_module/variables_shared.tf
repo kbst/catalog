@@ -106,3 +106,9 @@ variable "configuration_base_key" {
   description = "The key in the configuration map all other keys inherit from."
   default     = "apps"
 }
+
+variable "sensitive_group_kinds" {
+  type        = list(string)
+  description = "List of GroupKinds to mark sensitive. Defaults to [\"_/Secret\"]"
+  default     = ["_/Secret"]
+}
