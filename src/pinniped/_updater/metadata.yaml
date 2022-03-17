@@ -1,0 +1,2 @@
+url: https://github.com/vmware-tanzu/pinniped.git
+filter_tags: ^v(.+)
