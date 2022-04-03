@@ -1,4 +1,4 @@
-FROM kubestack/framework:v0.14.0-beta.1-kind
+FROM kubestack/framework:v0.16.2-beta.0-kind
 
 COPY Pipfile Pipfile.lock /opt/
 WORKDIR /opt
