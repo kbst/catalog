@@ -58,9 +58,22 @@ data "kustomization_overlay" "current" {
     for_each = local.cfg["patches"] != null ? local.cfg["patches"] : []
     iterator = i
     content {
-      path   = i.value["path"]
-      patch  = i.value["patch"]
-      target = i.value["target"]
+      path  = i.value["path"]
+      patch = i.value["patch"]
+
+      dynamic "target" {
+        for_each = i.value["target"] != null ? toset([i.value["target"]]) : toset([])
+        iterator = j
+        content {
+          group               = j.value["group"]
+          version             = j.value["version"]
+          kind                = j.value["kind"]
+          name                = j.value["name"]
+          namespace           = j.value["namespace"]
+          label_selector      = j.value["label_selector"]
+          annotation_selector = j.value["annotation_selector"]
+        }
+      }
     }
   }
 
@@ -99,7 +112,7 @@ data "kustomization_overlay" "current" {
     iterator = i
     content {
       name = i.value["name"]
-      obj_ref = {
+      obj_ref {
         api_version = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["api_version"] : null
         group       = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["group"] : null
         version     = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["version"] : null
@@ -107,7 +120,7 @@ data "kustomization_overlay" "current" {
         name        = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["name"] : null
         namespace   = lookup(i.value, "obj_ref") != null ? i.value["obj_ref"]["namespace"] : null
       }
-      field_ref = {
+      field_ref {
         field_path = lookup(i.value, "field_ref") != null ? i.value["field_ref"]["field_path"] : null
       }
     }
