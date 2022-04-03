@@ -20,6 +20,6 @@ k3d:
 	kubectl config use-context k3d-catalog-tests
 	kubectl cluster-info
 
-test-kind: dist
-	docker build -t catalog:test-kind-${GITHUB_SHA} test/kind/
-	docker run --network host --rm -v `pwd`/_dist:/_dist:z -v ${HOME}/.kube/config:/opt/test/.kubeconfig:z catalog:test-kind-${GITHUB_SHA}
+test-k3d: dist
+	docker build -t catalog:test-k3d-${GITHUB_SHA} test/k3d/
+	docker run --network host --rm -v `pwd`/_dist:/_dist:z -v ${HOME}/.kube/config:/opt/test/.kubeconfig:z catalog:test-k3d-${GITHUB_SHA}
