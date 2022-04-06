@@ -5,3 +5,5 @@ metadata:
   name: test
   annotations:
     test: test
+  labels:
+    test: test

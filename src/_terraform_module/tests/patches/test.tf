@@ -27,6 +27,7 @@ module "mut" {
             kind                = "ConfigMap"
             name                = "test"
             namespace           = "test"
+            label_selector = "test"
             annotation_selector = "test"
           }
         }
