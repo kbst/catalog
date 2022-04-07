@@ -15,27 +15,9 @@ TIMEOUT = 600  # 10 minutes in seconds
 
 
 def run_cmd(name, path, cmd, timeout):
-    start = time.time()
-    p = Popen(cmd, cwd=path, stdout=PIPE, stderr=PIPE)
-    while True:
-        # we give up
-        if (time.time() - start) >= timeout:
-            break
-
-        exit_code = p.poll()
-        if exit_code is not None:
-            break
-
-    if exit_code != 0:
-        o = p.stdout.read()
-        if o:
-            logging.error(o.strip().decode("UTF-8"))
-
-        e = p.stderr.read()
-        if e:
-            logging.error(e.strip().decode("UTF-8"))
-
-    assert exit_code == 0
+    p = Popen(cmd, cwd=path)
+    p.wait(timeout / 5)
+    assert p.returncode == 0
 
 
 def wait_retries(name, timeout):
