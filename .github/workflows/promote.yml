@@ -26,12 +26,12 @@ jobs:
 
     # Promote archive
     - run: |
-            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            export NAME=$(echo $TAG | sed -r 's#-v[0-9]+.*$##')
             set +e
             while true
             do
-                gsutil cp gs://dev.catalog.kubestack.com/${NAME}.zip gs://catalog.kubestack.com/${NAME}.zip &&\
-                gsutil cp gs://dev.catalog.kubestack.com/module-${NAME}.zip gs://catalog.kubestack.com/module-${NAME}.zip &&\
+                gsutil cp gs://dev.catalog.kubestack.com/module-${NAME}-${GITHUB_SHA}.zip gs://catalog.kubestack.com/module-${TAG}.zip &&\
                 break
                 sleep 15
             done
@@ -39,5 +39,5 @@ jobs:
     # Check promotion
     - name: Check promotion
       run: |
-            export NAME=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
-            wget https://storage.googleapis.com/catalog.kubestack.com/module-${NAME}.zip
+            export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
+            wget https://storage.googleapis.com/catalog.kubestack.com/module-${TAG}.zip
