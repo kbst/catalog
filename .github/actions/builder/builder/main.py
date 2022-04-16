@@ -9,16 +9,6 @@ from sys import exit
 def create_archive(name, version):
     src = join(SRCDIR, name)
 
-    # legacy format artifacts
-    archive_dist = join(DISTDIR, name)
-    archive = join(DISTDIR, f'{name}-{version}')
-
-    copytree(src, archive_dist, ignore=ignore_patterns('_*', '*.tf'))
-
-    make_archive(archive, 'zip', DISTDIR, name)
-    print(f"[INFO] created `{archive}.zip`")
-
-    # terraform module artifacts
     module_dist = join(DISTDIR, f'module-{name}')
     module = join(DISTDIR, f'module-{name}-{version}')
 
