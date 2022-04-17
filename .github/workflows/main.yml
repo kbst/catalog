@@ -119,10 +119,10 @@ jobs:
   trigger-promote:
     runs-on: ubuntu-latest
     needs: publish
+    if: startsWith(github.ref, 'refs/heads/release-')
 
     steps:
     - uses: actions/checkout@v3.0.0
     - run: |
-            export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
+            export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
             git tag $TAG
-            git tag

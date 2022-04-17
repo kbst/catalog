@@ -112,7 +112,7 @@ class Catalog():
         # checkout tag to build in source repo
         entry.repo.git.checkout('-f', entry.tag)
 
-        self.branch_name = f'{release_tag}'
+        self.branch_name = f'release-{release_tag}'
         self.repo.git.checkout(settings.CATALOG_REF)
         self.repo.git.clean('-xdf')
         self.repo.git.checkout('-B', self.branch_name)
