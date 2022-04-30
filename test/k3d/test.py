@@ -16,7 +16,7 @@ TIMEOUT = 600  # 10 minutes in seconds
 
 def run_cmd(name, path, cmd, timeout):
     p = Popen(cmd, cwd=path)
-    p.wait(timeout / 5)
+    p.wait(timeout)
     assert p.returncode == 0
 
 
