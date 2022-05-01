@@ -1,5 +1,66 @@
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-service-proxier
+  name: sealed-secrets-service-proxier
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - sealed-secrets-controller
+  resources:
+  - services
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - 'http:sealed-secrets-controller:'
+  - sealed-secrets-controller
+  resources:
+  - services/proxy
+  verbs:
+  - create
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-key-admin
+  name: sealed-secrets-key-admin
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secrets-unsealer
+subjects:
+- kind: ServiceAccount
+  name: sealed-secrets-controller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations: {}
@@ -39,6 +100,15 @@ rules:
   - create
   - patch
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+  namespace: kube-system
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,7 +140,7 @@ spec:
         command:
         - controller
         env: []
-        image: quay.io/bitnami/sealed-secrets-controller:v0.17.4
+        image: docker.io/bitnami/sealed-secrets-controller:v0.17.5
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -131,6 +201,22 @@ spec:
     subresources:
       status: {}
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+  namespace: kube-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    name: sealed-secrets-controller
+  type: ClusterIP
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -149,34 +235,6 @@ subjects:
   name: system:authenticated
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-service-proxier
-  name: sealed-secrets-service-proxier
-  namespace: kube-system
-rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - sealed-secrets-controller
-  resources:
-  - services
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resourceNames:
-  - 'http:sealed-secrets-controller:'
-  - sealed-secrets-controller
-  resources:
-  - services/proxy
-  verbs:
-  - create
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   annotations: {}
@@ -188,64 +246,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: sealed-secrets-key-admin
-subjects:
-- kind: ServiceAccount
-  name: sealed-secrets-controller
-  namespace: kube-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-  namespace: kube-system
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-  namespace: kube-system
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    name: sealed-secrets-controller
-  type: ClusterIP
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-key-admin
-  name: sealed-secrets-key-admin
-  namespace: kube-system
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-  - list
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: secrets-unsealer
 subjects:
 - kind: ServiceAccount
   name: sealed-secrets-controller
