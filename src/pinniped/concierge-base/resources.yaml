@@ -1,0 +1,624 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pinniped-concierge-config
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+data:
+  pinniped.yaml: "discovery:\n  url: null\napi:\n  servingCertificate:\n    durationSeconds: 2592000\n    renewBeforeSeconds: 2160000\napiGroupSuffix: pinniped.dev\n# aggregatedAPIServerPort may be set here, although other YAML references to the default port (10250) may also need to be updated\n# impersonationProxyServerPort may be set here, although other YAML references to the default port (8444) may also need to be updated\nnames:\n  servingCertificateSecret: pinniped-concierge-api-tls-serving-certificate\n  credentialIssuer: pinniped-concierge-config\n  apiService: pinniped-concierge-api\n  impersonationLoadBalancerService: pinniped-concierge-impersonation-proxy-load-balancer\n  impersonationClusterIPService: pinniped-concierge-impersonation-proxy-cluster-ip\n  impersonationTLSCertificateSecret: pinniped-concierge-impersonation-proxy-tls-serving-certificate\n  impersonationCACertificateSecret: pinniped-concierge-impersonation-proxy-ca-certificate\n  impersonationSignerSecret: pinniped-concierge-impersonation-proxy-signer-ca-certificate\n  agentServiceAccount: pinniped-concierge-kube-cert-agent\nlabels: {\"app\":\"pinniped-concierge\"}\nkubeCertAgent:\n  namePrefix: pinniped-concierge-kube-cert-agent-\n  \n  \n  image: projects.registry.vmware.com/pinniped/pinniped-server:v0.15.0@sha256:62be9ea6c98760439a4f471963c654fdc789ea839edbfb8102e7022462dcc782\n  \n  \n  \n\n"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinniped-concierge
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pinniped-concierge
+  template:
+    metadata:
+      labels:
+        app: pinniped-concierge
+        deployment.pinniped.dev: concierge
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      serviceAccountName: pinniped-concierge
+      containers:
+        - name: pinniped-concierge
+          image: projects.registry.vmware.com/pinniped/pinniped-server:v0.15.0@sha256:62be9ea6c98760439a4f471963c654fdc789ea839edbfb8102e7022462dcc782
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          command:
+            - pinniped-concierge
+            - --config=/etc/config/pinniped.yaml
+            - --downward-api-path=/etc/podinfo
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: config-volume
+              mountPath: /etc/config
+              readOnly: true
+            - name: podinfo
+              mountPath: /etc/podinfo
+              readOnly: true
+            - name: impersonation-proxy
+              mountPath: /var/run/secrets/impersonation-proxy.concierge.pinniped.dev/serviceaccount
+              readOnly: true
+          env: []
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10250
+              scheme: HTTPS
+            initialDelaySeconds: 2
+            timeoutSeconds: 15
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 10250
+              scheme: HTTPS
+            initialDelaySeconds: 2
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        - name: config-volume
+          configMap:
+            name: pinniped-concierge-config
+        - name: impersonation-proxy
+          secret:
+            secretName: pinniped-concierge-impersonation-proxy
+            items:
+              - key: token
+                path: token
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: labels
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: name
+                fieldRef:
+                  fieldPath: metadata.name
+              - path: namespace
+                fieldRef:
+                  fieldPath: metadata.namespace
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    deployment.pinniped.dev: concierge
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinniped-concierge-api
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+  annotations:
+    kapp.k14s.io/disable-default-label-scoping-rules: ""
+spec:
+  type: ClusterIP
+  selector:
+    deployment.pinniped.dev: concierge
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 10250
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinniped-concierge-proxy
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+  annotations:
+    kapp.k14s.io/disable-default-label-scoping-rules: ""
+spec:
+  type: ClusterIP
+  selector:
+    deployment.pinniped.dev: concierge
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 8444
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.login.concierge.pinniped.dev
+  labels:
+    app: pinniped-concierge
+spec:
+  version: v1alpha1
+  group: login.concierge.pinniped.dev
+  groupPriorityMinimum: 9900
+  versionPriority: 15
+  service:
+    name: pinniped-concierge-api
+    namespace: pinniped-concierge
+    port: 443
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.identity.concierge.pinniped.dev
+  labels:
+    app: pinniped-concierge
+spec:
+  version: v1alpha1
+  group: identity.concierge.pinniped.dev
+  groupPriorityMinimum: 9900
+  versionPriority: 15
+  service:
+    name: pinniped-concierge-api
+    namespace: pinniped-concierge
+    port: 443
+---
+apiVersion: config.concierge.pinniped.dev/v1alpha1
+kind: CredentialIssuer
+metadata:
+  name: pinniped-concierge-config
+  labels:
+    app: pinniped-concierge
+spec:
+  impersonationProxy:
+    mode: auto
+    service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pinniped-concierge-impersonation-proxy
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+  annotations:
+    kapp.k14s.io/change-rule: upsert after upserting impersonation-proxy.concierge.pinniped.dev/serviceaccount
+    kubernetes.io/service-account.name: pinniped-concierge-impersonation-proxy
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pinniped-concierge-aggregated-api-server
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apiregistration.k8s.io
+    resources:
+      - apiservices
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+      - mutatingwebhookconfigurations
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - flowcontrol.apiserver.k8s.io
+    resources:
+      - flowschemas
+      - prioritylevelconfigurations
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+    resourceNames:
+      - nonroot
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - list
+  - apiGroups:
+      - config.concierge.pinniped.dev
+    resources:
+      - credentialissuers
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+  - apiGroups:
+      - config.concierge.pinniped.dev
+    resources:
+      - credentialissuers/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - authentication.concierge.pinniped.dev
+    resources:
+      - jwtauthenticators
+      - webhookauthenticators
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-aggregated-api-server
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: ClusterRole
+  name: pinniped-concierge-aggregated-api-server
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pinniped-concierge-impersonation-proxy
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - users
+      - groups
+      - serviceaccounts
+    verbs:
+      - impersonate
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - '*'
+    verbs:
+      - impersonate
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-impersonation-proxy
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge-impersonation-proxy
+    namespace: pinniped-concierge
+roleRef:
+  kind: ClusterRole
+  name: pinniped-concierge-impersonation-proxy
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pinniped-concierge-kube-cert-agent
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-kube-cert-agent
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge-kube-cert-agent
+    namespace: pinniped-concierge
+roleRef:
+  kind: Role
+  name: pinniped-concierge-kube-cert-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pinniped-concierge-aggregated-api-server
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - delete
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - apps
+    resources:
+      - replicasets
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-aggregated-api-server
+  namespace: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: Role
+  name: pinniped-concierge-aggregated-api-server
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pinniped-concierge-kube-system-pod-read
+  namespace: kube-system
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-kube-system-pod-read
+  namespace: kube-system
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: Role
+  name: pinniped-concierge-kube-system-pod-read
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pinniped-concierge-pre-authn-apis
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - login.concierge.pinniped.dev
+    resources:
+      - tokencredentialrequests
+    verbs:
+      - create
+      - list
+  - apiGroups:
+      - identity.concierge.pinniped.dev
+    resources:
+      - whoamirequests
+    verbs:
+      - create
+      - list
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-pre-authn-apis
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: Group
+    name: system:authenticated
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: system:unauthenticated
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: pinniped-concierge-pre-authn-apis
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: ClusterRole
+  name: system:auth-delegator
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-extension-apiserver-authentication-reader
+  namespace: kube-system
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: Role
+  name: extension-apiserver-authentication-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-cluster-info-lister-watcher
+  namespace: kube-public
+  labels:
+    app: pinniped-concierge
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - watch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pinniped-concierge-cluster-info-lister-watcher
+  namespace: kube-public
+  labels:
+    app: pinniped-concierge
+subjects:
+  - kind: ServiceAccount
+    name: pinniped-concierge
+    namespace: pinniped-concierge
+roleRef:
+  kind: Role
+  name: pinniped-concierge-cluster-info-lister-watcher
+  apiGroup: rbac.authorization.k8s.io
