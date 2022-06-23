@@ -8,7 +8,7 @@ on:
     - "*"  # run for tags
 
 env:
-  TERRAFORM_VERSION: "1.1.7"
+  TERRAFORM_VERSION: "1.1.9"
 
 jobs:
 
