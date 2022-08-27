@@ -6,7 +6,7 @@ metadata:
   labels:
     app: pinniped-concierge
 data:
-  pinniped.yaml: "discovery:\n  url: null\napi:\n  servingCertificate:\n    durationSeconds: 2592000\n    renewBeforeSeconds: 2160000\napiGroupSuffix: pinniped.dev\n# aggregatedAPIServerPort may be set here, although other YAML references to the default port (10250) may also need to be updated\n# impersonationProxyServerPort may be set here, although other YAML references to the default port (8444) may also need to be updated\nnames:\n  servingCertificateSecret: pinniped-concierge-api-tls-serving-certificate\n  credentialIssuer: pinniped-concierge-config\n  apiService: pinniped-concierge-api\n  impersonationLoadBalancerService: pinniped-concierge-impersonation-proxy-load-balancer\n  impersonationClusterIPService: pinniped-concierge-impersonation-proxy-cluster-ip\n  impersonationTLSCertificateSecret: pinniped-concierge-impersonation-proxy-tls-serving-certificate\n  impersonationCACertificateSecret: pinniped-concierge-impersonation-proxy-ca-certificate\n  impersonationSignerSecret: pinniped-concierge-impersonation-proxy-signer-ca-certificate\n  agentServiceAccount: pinniped-concierge-kube-cert-agent\nlabels: {\"app\":\"pinniped-concierge\"}\nkubeCertAgent:\n  namePrefix: pinniped-concierge-kube-cert-agent-\n  \n  \n  image: projects.registry.vmware.com/pinniped/pinniped-server:v0.18.0@sha256:95e1f1d62cb00328636ae73758153bd698207e8734f8500949fa4d32c0719b57\n  \n  \n  \n\n"
+  pinniped.yaml: "discovery:\n  url: null\napi:\n  servingCertificate:\n    durationSeconds: 2592000\n    renewBeforeSeconds: 2160000\napiGroupSuffix: pinniped.dev\n# aggregatedAPIServerPort may be set here, although other YAML references to the default port (10250) may also need to be updated\n# impersonationProxyServerPort may be set here, although other YAML references to the default port (8444) may also need to be updated\nnames:\n  servingCertificateSecret: pinniped-concierge-api-tls-serving-certificate\n  credentialIssuer: pinniped-concierge-config\n  apiService: pinniped-concierge-api\n  impersonationLoadBalancerService: pinniped-concierge-impersonation-proxy-load-balancer\n  impersonationClusterIPService: pinniped-concierge-impersonation-proxy-cluster-ip\n  impersonationTLSCertificateSecret: pinniped-concierge-impersonation-proxy-tls-serving-certificate\n  impersonationCACertificateSecret: pinniped-concierge-impersonation-proxy-ca-certificate\n  impersonationSignerSecret: pinniped-concierge-impersonation-proxy-signer-ca-certificate\n  agentServiceAccount: pinniped-concierge-kube-cert-agent\nlabels: {\"app\":\"pinniped-concierge\"}\nkubeCertAgent:\n  namePrefix: pinniped-concierge-kube-cert-agent-\n  \n  \n  image: projects.registry.vmware.com/pinniped/pinniped-server:v0.19.0@sha256:f71d3b973ba111a7b4499a279bf8cdf716e675ab0510645df25969fb2366b209\n  \n  \n  \n\n"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,7 +34,7 @@ spec:
       serviceAccountName: pinniped-concierge
       containers:
         - name: pinniped-concierge
-          image: projects.registry.vmware.com/pinniped/pinniped-server:v0.18.0@sha256:95e1f1d62cb00328636ae73758153bd698207e8734f8500949fa4d32c0719b57
+          image: projects.registry.vmware.com/pinniped/pinniped-server:v0.19.0@sha256:f71d3b973ba111a7b4499a279bf8cdf716e675ab0510645df25969fb2366b209
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true

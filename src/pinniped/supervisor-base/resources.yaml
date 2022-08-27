@@ -178,7 +178,7 @@ spec:
       serviceAccountName: pinniped-supervisor
       containers:
       - name: pinniped-supervisor
-        image: projects.registry.vmware.com/pinniped/pinniped-server:v0.18.0@sha256:95e1f1d62cb00328636ae73758153bd698207e8734f8500949fa4d32c0719b57
+        image: projects.registry.vmware.com/pinniped/pinniped-server:v0.19.0@sha256:f71d3b973ba111a7b4499a279bf8cdf716e675ab0510645df25969fb2366b209
         imagePullPolicy: IfNotPresent
         command:
         - pinniped-supervisor
