@@ -484,6 +484,7 @@ metadata:
   name: pinniped-concierge
   labels:
     app: pinniped-concierge
+    pod-security.kubernetes.io/enforce: privileged
 ---
 apiVersion: v1
 kind: ServiceAccount
