@@ -57,6 +57,23 @@ spec:
                   metadata:
                     description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata'
                     nullable: true
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      finalizers:
+                        items:
+                          type: string
+                        type: array
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      name:
+                        type: string
+                      namespace:
+                        type: string
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
                   type:
@@ -121,22 +138,6 @@ spec:
     subresources:
       status: {}
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-  namespace: kube-system
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    name: sealed-secrets-controller
-  type: ClusterIP
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -159,35 +160,6 @@ kind: Role
 metadata:
   annotations: {}
   labels:
-    name: sealed-secrets-service-proxier
-  name: sealed-secrets-service-proxier
-  namespace: kube-system
-rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - sealed-secrets-controller
-  resources:
-  - services
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resourceNames:
-  - 'http:sealed-secrets-controller:'
-  - http:sealed-secrets-controller:http
-  - sealed-secrets-controller
-  resources:
-  - services/proxy
-  verbs:
-  - create
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations: {}
-  labels:
     name: sealed-secrets-key-admin
   name: sealed-secrets-key-admin
   namespace: kube-system
@@ -199,6 +171,22 @@ rules:
   verbs:
   - create
   - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secrets-unsealer
+subjects:
+- kind: ServiceAccount
+  name: sealed-secrets-controller
+  namespace: kube-system
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -240,7 +228,7 @@ spec:
         command:
         - controller
         env: []
-        image: docker.io/bitnami/sealed-secrets-controller:v0.20.2
+        image: docker.io/bitnami/sealed-secrets-controller:v0.20.5
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -291,22 +279,6 @@ subjects:
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: secrets-unsealer
-subjects:
-- kind: ServiceAccount
-  name: sealed-secrets-controller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations: {}
@@ -351,4 +323,49 @@ rules:
   resources:
   - namespaces
   verbs:
+  - get
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+  namespace: kube-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    name: sealed-secrets-controller
+  type: ClusterIP
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: sealed-secrets-service-proxier
+  name: sealed-secrets-service-proxier
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - sealed-secrets-controller
+  resources:
+  - services
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
+  - 'http:sealed-secrets-controller:'
+  - http:sealed-secrets-controller:http
+  - sealed-secrets-controller
+  resources:
+  - services/proxy
+  verbs:
+  - create
   - get
