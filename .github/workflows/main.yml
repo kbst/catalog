@@ -129,7 +129,7 @@ jobs:
     - uses: actions/github-script@v6
       with:
         script: |
-          const tag = context.ref.replace("refs/heads/release-", "")
+          const tag = context.ref.replace("refs/heads/release-", "refs/tags/")
 
           github.rest.git.createRef({
             owner: context.repo.owner,
