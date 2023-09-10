@@ -126,3 +126,5 @@ jobs:
     - run: |
             export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
             git tag $TAG
+            git tag | grep $TAG
+            git push origin $TAG
