@@ -121,10 +121,26 @@ jobs:
     needs: publish
     if: startsWith(github.ref, 'refs/heads/release-')
 
+    permissions:
+      contents: write # required for createRef
+      actions: write  # required for createWorkflowDispatch
+
     steps:
-    - uses: actions/checkout@v3.0.0
-    - run: |
-            export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
-            git tag $TAG
-            git tag | grep $TAG
-            git push origin $TAG
+    - uses: actions/github-script@v6
+      with:
+        script: |
+          const tag = context.ref.replace("refs/heads/release-", "")
+
+          github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag,
+            context.sha,
+          });
+
+          octokit.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            'promote.yml',
+            tag,
+          });

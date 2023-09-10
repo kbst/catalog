@@ -1,11 +1,7 @@
 name: Promote
 
 on:
-  push:
-    branches:
-    - "!*" # do not run for branches
-    tags:
-    - "*"  # run for tags
+  workflow_dispatch:
 
 jobs:
   #
