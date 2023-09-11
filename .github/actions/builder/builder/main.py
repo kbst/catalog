@@ -38,8 +38,13 @@ def get_build_targets(ref):
     if ref.startswith('refs/tags/'):
         ref_name = ref.replace('refs/tags/', '')
         is_tag = True
-    elif ref.startswith('refs/heads/'):
+
+    if ref.startswith('refs/heads/'):
         ref_name = ref.replace('refs/heads/', '')
+        is_tag = False
+
+    if ref.startswith('refs/heads/release-'):
+        ref_name = ref.replace('refs/heads/release-', '')
         is_tag = False
 
     available_names = [n for n in listdir(SRCDIR) if not n.startswith('_')]
