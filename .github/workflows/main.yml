@@ -131,14 +131,14 @@ jobs:
         script: |
           const tag = context.ref.replace("refs/heads/release-", "refs/tags/")
 
-          github.rest.git.createRef({
+          await github.rest.git.createRef({
             owner: context.repo.owner,
             repo: context.repo.repo,
             ref: tag,
             sha: context.sha,
           });
 
-          github.rest.actions.createWorkflowDispatch({
+          await github.rest.actions.createWorkflowDispatch({
             owner: context.repo.owner,
             repo: context.repo.repo,
             workflow_id: "promote.yml",
