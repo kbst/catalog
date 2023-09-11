@@ -1,4 +1,5 @@
 name: Build
+run-name: 'Build & test :: ${{ github.ref }}'
 
 on:
   push:
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3.0.0
+    - uses: actions/checkout@v4.0.0
 
     # Run builder
     - name: Run builder
@@ -26,7 +27,7 @@ jobs:
 
     # Upload artifacts
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v3.0.0
+      uses: actions/upload-artifact@v3.1.3
       with:
         name: _dist
         path: _dist/*.zip
@@ -40,7 +41,7 @@ jobs:
 
     steps:
     # Checkout
-    - uses: actions/checkout@v3.0.0
+    - uses: actions/checkout@v4.0.0
 
     # Setup Terraform
     - name: Setup Terraform
@@ -57,13 +58,36 @@ jobs:
   #
   #
   # Test deploy to k3d
-  test-k3d:
+  get-matrix:
     runs-on: ubuntu-latest
     needs: build
 
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v4.0.0
+
+      - name: 'Download build-artifacts'
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: _dist
+          path: _dist
+
+      - id: get-matrix
+        uses: ./.github/actions/get-matrix
+
+  test-k3d:
+    runs-on: ubuntu-latest
+    needs: get-matrix
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.get-matrix.outputs.matrix) }}
+
     steps:
     # Checkout
-    - uses: actions/checkout@v3.0.0
+    - uses: actions/checkout@v4.0.0
 
     # Setup k3d
     - name: Setup k3d
@@ -76,18 +100,14 @@ jobs:
 
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3.0.2
       with:
         name: _dist
         path: _dist
 
-    # Build test image
-    - name: Build test image
-      run: docker build -t test-k3d test/k3d/
-
     # Deploy to cluster
     - name: Run test container
-      run: docker run --network host --rm -v `pwd`/_dist:/_dist -v $HOME/.kube/config:/opt/test/.kubeconfig test-k3d
+      run: make test-k3d test-name=${{ matrix.name }} test-variant=${{ matrix.variant}}
 
 
   #
@@ -100,15 +120,17 @@ jobs:
     steps:
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v3.0.0
+      uses: actions/download-artifact@v3.0.2
       with:
         name: _dist
         path: _dist
 
     # Upload archive
-    - uses: google-github-actions/setup-gcloud@v0.5.1
+    - uses: google-github-actions/auth@v1.1.1
       with:
-        service_account_key: ${{ secrets.GCLOUD_AUTH }}
+        credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+
+    - uses: google-github-actions/setup-gcloud@v1.1.1
 
     - run: gsutil -m cp _dist/*.zip gs://dev.catalog.kubestack.com
 

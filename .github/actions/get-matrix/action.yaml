@@ -1,0 +1,5 @@
+name: "Get Matrix for Catalog Build"
+description: "Get test matrix based on build action output."
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
