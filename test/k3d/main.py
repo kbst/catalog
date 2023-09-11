@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-import time
 import logging
-from os import listdir
-from os.path import isdir, isfile, join, abspath
-from subprocess import Popen, PIPE
+import sys
+import time
+
+from os.path import isdir, join
+from subprocess import Popen
 from tempfile import TemporaryDirectory
 from shutil import unpack_archive
+
 from kubernetes import client, config
 from jinja2 import Environment, FileSystemLoader
 
@@ -103,30 +105,33 @@ def run_steps(name, path):
             wait_retries(name, TIMEOUT)
 
 
-def test_variants():
-    for name in listdir(DISTDIR):
-        if not isfile(name) and (not name.startswith('module-') or not name.endswith('.zip')):
-            continue
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        logging.fatal(f"missing 2 args: name and variant")
+        sys.exit(1)
 
-        with TemporaryDirectory() as root:
-            mut = join(root, "mut")
-            archive = join(DISTDIR, name)
-            unpack_archive(archive, mut, "zip")
-            for variant in listdir(mut):
-                variant_path = join(mut, variant)
-                if not isdir(variant_path):
-                    continue
+    name = sys.argv[1]
+    variant = sys.argv[2]
 
-                # write main.tf into root_module
-                jinja = Environment(loader=FileSystemLoader("."))
-                template = jinja.get_template('main.tf.tpl')
-                data = template.render(
-                    {'entry_module': mut, 'variant': variant})
+    with TemporaryDirectory() as root:
+        mut = join(root, "mut")
+        archive = join(DISTDIR, name)
+        unpack_archive(archive, mut, "zip")
+        
+        variant_path = join(mut, variant)
+        if not isdir(variant_path):
+            logging.fatal(f"path not found: {variant_path}")
+            sys.exit(1)
 
-                with open(f'{root}/main.tf', 'w') as f:
-                    f.write(data)
-                    # always include newline at end of file
-                    f.write('\n')
+        # write main.tf into root_module
+        jinja = Environment(loader=FileSystemLoader("."))
+        template = jinja.get_template('main.tf.tpl')
+        data = template.render(
+            {'entry_module': mut, 'variant': variant})
 
-                # yield instructs nose to treat each variant as a separate test
-                yield run_steps, f"{name} - {variant}", root
+        with open(f'{root}/main.tf', 'w') as f:
+            f.write(data)
+            # always include newline at end of file
+            f.write('\n')
+
+        run_steps(f"{name} - {variant}", root)

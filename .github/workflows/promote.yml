@@ -1,4 +1,5 @@
 name: Promote
+run-name: 'Promote :: ${{ github.ref }}'
 
 on: workflow_dispatch
 
@@ -15,9 +16,11 @@ jobs:
 
     steps:
     # Setup gcloud CLI
-    - uses: google-github-actions/setup-gcloud@v0.5.1
+    - uses: google-github-actions/auth@v1.1.1
       with:
-        service_account_key: ${{ secrets.GCLOUD_AUTH }}
+        credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+
+    - uses: google-github-actions/setup-gcloud@v1.1.1
 
     # Promote archive
     - run: |

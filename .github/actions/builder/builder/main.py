@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 from os import environ, listdir, mkdir
 from os.path import isdir, join
 from shutil import copytree, ignore_patterns, make_archive, rmtree
@@ -15,7 +16,7 @@ def create_archive(name, version):
     copytree(src, module_dist, ignore=ignore_patterns('_*'))
 
     make_archive(module, 'zip', module_dist)
-    print(f"[INFO] created `{module}.zip`")
+    logging.info(f"[INFO] created `{module}.zip`")
 
 
 def get_build_targets(ref):
