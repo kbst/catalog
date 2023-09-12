@@ -1,3 +1,6 @@
 _build/
 _dist/
 .terraform/
+
+*.tfstate
+*.tfstate.*

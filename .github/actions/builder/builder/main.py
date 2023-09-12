@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import logging
+from json import dumps
 from os import environ, listdir, mkdir
-from os.path import isdir, join
-from shutil import copytree, ignore_patterns, make_archive, rmtree
+from os.path import isdir, isfile, join
+from shutil import copytree, ignore_patterns, make_archive, rmtree, unpack_archive
 from sys import exit
+from tempfile import TemporaryDirectory
 
 
 def create_archive(name, version):
@@ -16,7 +17,6 @@ def create_archive(name, version):
     copytree(src, module_dist, ignore=ignore_patterns('_*'))
 
     make_archive(module, 'zip', module_dist)
-    logging.info(f"[INFO] created `{module}.zip`")
 
 
 def get_build_targets(ref):
@@ -84,17 +84,21 @@ def get_build_targets(ref):
     # we default to the test entry
     return [("test", hash)]
 
-
 if __name__ == "__main__":
     SRCDIR = 'src'
     DISTDIR = '_dist'
+    OUTPUTSFILE = environ.get('GITHUB_OUTPUT')
 
+    #
+    #
     # Clean DISTDIR
     if isdir(DISTDIR):
         rmtree(DISTDIR)
     mkdir(DISTDIR)
 
-    # Get name and version
+    #
+    #
+    # Build artifacts
     ref = environ.get('GITHUB_REF', None)
     if not ref:
         exit(f"[ERROR] `GITHUB_REF` env var not set")
@@ -106,3 +110,55 @@ if __name__ == "__main__":
 
     for name, version in build_targets:
         create_archive(name, version)
+
+    #
+    #
+    # Generate all entries output for publish-gh job
+    all_targets = get_build_targets("refs/heads/all-targets")
+    
+    names = []
+    for name, _ in all_targets:
+        names.append(f'"{name}"')
+
+    tf_var_names_output = f'TF_VAR_names=[{",".join(names)}]'
+
+    #
+    #
+    # Generate matrix output for test job
+    matrix_output_data = {
+        "include": []
+    }
+
+    for name in listdir(DISTDIR):
+        if not isfile(name) and (not name.startswith('module-') or not name.endswith('.zip')):
+            continue
+
+        with TemporaryDirectory() as root:
+            mut = join(root, "mut")
+            archive = join(DISTDIR, name)
+            unpack_archive(archive, mut, "zip")
+            for variant in listdir(mut):
+                variant_path = join(mut, variant)
+                if not isdir(variant_path):
+                    continue
+                
+                matrix_output_data["include"].append({
+                    "variant": variant,
+                    "name": name
+                })
+
+    matrix_output = f'matrix={dumps(matrix_output_data)}'
+
+
+    #
+    #
+    # Write or print outputs
+    if OUTPUTSFILE:
+        with open(OUTPUTSFILE, 'a') as f:
+            f.write(f'{tf_var_names_output}\n')
+            f.write(f'{matrix_output}\n')
+        exit(0)
+
+    print(tf_var_names_output)
+    print(matrix_output)
+    exit(0)
