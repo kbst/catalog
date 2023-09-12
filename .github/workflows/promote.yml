@@ -8,7 +8,7 @@ jobs:
   #
   # Promote tagged releases
   # from `dev.catalog.kubestack.com` to `catalog.kubestack.com`
-  promote:
+  promote-gcs:
     runs-on: ubuntu-latest
 
     # promote only for tags
@@ -18,7 +18,8 @@ jobs:
     # Setup gcloud CLI
     - uses: google-github-actions/auth@v1.1.1
       with:
-        credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+        workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
+        service_account: github-actions-catalog-uploade@nice-road-159709.iam.gserviceaccount.com
 
     - uses: google-github-actions/setup-gcloud@v1.1.1
 
@@ -39,3 +40,35 @@ jobs:
       run: |
             export TAG=$(echo $GITHUB_REF | sed -e "s#^refs/tags/##")
             wget https://storage.googleapis.com/catalog.kubestack.com/module-${TAG}.zip
+
+  promote-gh:
+    runs-on: ubuntu-latest
+
+    # promote only for tags
+    if: startsWith(github.ref, 'refs/tags/test')
+
+    steps:
+    - uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.MODULES_PAT }}
+        script: |
+          const nameVersion = context.ref.replace("refs/tags/", "")
+          const name = nameVersion.replace(/-v[0-9]+.*$/i, "")
+          const version = nameVersion.replace(`${name}-`, "")
+
+          const targetOwner = "kubestack-modules"
+          const targetRepo = `terraform-kustomization-${name}`
+          const targetRef = `refs/tags/${version}`
+
+          const refResp = await github.rest.git.getRef({
+            owner: targetOwner,
+            repo: targetRepo,
+            ref: context.ref.replace("refs/tags/", "heads/release-"),
+          });
+
+          await github.rest.git.createRef({
+            owner: targetOwner,
+            repo: targetRepo,
+            ref: context.ref,
+            sha: refResp.data.object.sha,
+          });
