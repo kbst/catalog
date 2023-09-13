@@ -104,10 +104,6 @@ jobs:
     needs: [build]
     if: startsWith(github.ref, 'refs/heads/test-')
 
-    defaults:
-      run:
-        working-directory: repositories
-
     env:
       GITHUB_TOKEN: ${{ secrets.MODULES_PAT }}
       TF_VAR_names: ${{ needs.build.outputs.TF_VAR_names }}
@@ -126,8 +122,12 @@ jobs:
 
     # Apply target kubestack-modules repository
     - run: terraform init
+      with:
+        working-directory: repositories
 
     - run: terraform apply --auto-approve
+      with:
+        working-directory: repositories
 
     - name: 'Download build-artifacts'
       uses: actions/download-artifact@v3.0.2
