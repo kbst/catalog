@@ -138,7 +138,7 @@ jobs:
     # Push artifact content as brach to target repo
     - run: |
         export BRANCH=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
-        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
+        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/test-##")
         export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
 
         mkdir "terraform-kustomization-${NAME}"
@@ -156,6 +156,33 @@ jobs:
         git add .
         git commit -m "Release ${NAMEVERSION}"
         git push target "${BRANCH}"
+
+    - uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.MODULES_PAT }}
+        script: |
+          const nameVersion = context.ref.replace("refs/tags/", "")
+          const name = nameVersion.replace(/-v[0-9]+.*$/i, "")
+          const version = nameVersion.replace(name, "")
+
+          const targetOwner = "kubestack-modules"
+          const targetRepo = `terraform-kustomization-${name}`
+          const targetRef = `refs/tags/${version}`
+
+          const refResp = await github.rest.git.getRef({
+            owner: targetOwner,
+            repo: targetRepo,
+            ref: context.ref.replace("refs/tags/", "refs/heads/release-"),
+          });
+
+          console.log(refResp)
+
+          //await github.rest.git.createRef({
+          //  owner: targetOwner,
+          //  repo: targetRepo,
+          //  ref: context.ref,
+          //  sha: refResp.data.object.sha,
+          //});
 
 
   #
