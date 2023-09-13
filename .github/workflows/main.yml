@@ -141,6 +141,10 @@ jobs:
         export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/test-##")
         export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
 
+        echo "branch: ${BRANCH}"
+        echo "nameVersion: ${NAMEVERSION}"
+        echo "name: ${NAME}"
+
         mkdir "terraform-kustomization-${NAME}"
         cd "terraform-kustomization-${NAME}"
         
