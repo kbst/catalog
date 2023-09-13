@@ -18,11 +18,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      TF_VAR_names: ${{ steps.build.outputs.TF_VAR_names }}
+      matrix: ${{ steps.build.outputs.matrix }}
+
     steps:
     - uses: actions/checkout@v4.0.0
 
     # Run builder
-    - name: Run builder
+    - id: build
+      name: Run builder
       uses: ./.github/actions/builder
 
     # Upload artifacts
@@ -58,32 +63,13 @@ jobs:
   #
   #
   # Test deploy to k3d
-  get-matrix:
+  test-k3d:
     runs-on: ubuntu-latest
     needs: build
 
-    outputs:
-      matrix: ${{ steps.get-matrix.outputs.matrix }}
-
-    steps:
-      - uses: actions/checkout@v4.0.0
-
-      - name: 'Download build-artifacts'
-        uses: actions/download-artifact@v3.0.2
-        with:
-          name: _dist
-          path: _dist
-
-      - id: get-matrix
-        uses: ./.github/actions/get-matrix
-
-  test-k3d:
-    runs-on: ubuntu-latest
-    needs: get-matrix
-
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.get-matrix.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.build.outputs.matrix) }}
 
     steps:
     # Checkout
@@ -113,9 +99,73 @@ jobs:
   #
   #
   #
-  publish:
+  publish-gh:
     runs-on: ubuntu-latest
-    needs: [test-k3d, test-terraform]
+    needs: [build, test-k3d, test-terraform]
+    if: startsWith(github.ref, 'refs/heads/release-test-')
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.MODULES_PAT }}
+      TF_VAR_names: ${{ needs.build.outputs.TF_VAR_names }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4.0.0
+
+    - uses: google-github-actions/auth@v1.1.1
+      with:
+        workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
+        service_account: kbst-catalog-repos-tf@nice-road-159709.iam.gserviceaccount.com
+
+    # Apply target kubestack-modules repository
+    - run: terraform init
+      working-directory: repositories
+
+    - run: terraform apply --auto-approve
+      working-directory: repositories
+
+    - name: 'Download build-artifacts'
+      uses: actions/download-artifact@v3.0.2
+      with:
+        name: _dist
+        path: _dist
+
+    # Push artifact content as brach to target repo
+    - run: |
+        export BRANCH=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
+        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
+        export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
+
+        mkdir "terraform-kustomization-${NAME}"
+        cd "terraform-kustomization-${NAME}"
+
+        git init .
+        git config user.name "Kubestack Modules"
+        git config user.email "hello+modules@kubestack.com"
+
+        git branch -m "${BRANCH}"
+        git remote add target "https://${{ secrets.MODULES_PAT }}@github.com/kubestack-modules/terraform-kustomization-${NAME}.git"
+
+        unzip ../_dist/module-${NAME}-${GITHUB_SHA}.zip
+
+        git add .
+        git commit -m "Release ${NAMEVERSION}"
+        git push target "${BRANCH}"
+
+
+  #
+  #
+  #
+  publish-gcs:
+    runs-on: ubuntu-latest
+    needs: [build, test-k3d, test-terraform]
+    if: startsWith(github.ref, 'refs/heads/release-')
+
+    permissions:
+      id-token: write
 
     steps:
     # Download build artifacts
@@ -128,7 +178,8 @@ jobs:
     # Upload archive
     - uses: google-github-actions/auth@v1.1.1
       with:
-        credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+        workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
+        service_account: github-actions-catalog-uploade@nice-road-159709.iam.gserviceaccount.com
 
     - uses: google-github-actions/setup-gcloud@v1.1.1
 
@@ -140,7 +191,7 @@ jobs:
   # trigger promotion by tagging release
   trigger-promote:
     runs-on: ubuntu-latest
-    needs: publish
+    needs: [publish-gcs, publish-gh]
     if: startsWith(github.ref, 'refs/heads/release-')
 
     permissions:
