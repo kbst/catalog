@@ -146,16 +146,16 @@ jobs:
 
         mkdir "terraform-kustomization-${NAME}"
         cd "terraform-kustomization-${NAME}"
-        
+
+        git init .
         git config user.name "Kubestack Modules"
         git config user.email "hello+modules@kubestack.com"
-        
-        git init .
+
         git branch -m "${BRANCH}"
         git remote add target "https://${{ secrets.MODULES_PAT }}@github.com/kubestack-modules/terraform-kustomization-${NAME}.git"
 
         unzip ../_dist/module-${NAME}-${GITHUB_SHA}.zip
-        
+
         git add .
         git commit -m "Release ${NAMEVERSION}"
         git push target "${BRANCH}"
