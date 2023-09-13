@@ -156,7 +156,7 @@ jobs:
         git branch -m "${BRANCH}"
         git remote add target "https://${{ secrets.MODULES_PAT }}@github.com/kubestack-modules/terraform-kustomization-${NAME}.git"
 
-        ls -al ../_dist/
+        ls -al ../
         ls -al ../_dist/
         tar xf ../_dist/module-${NAME}-${GITHUB_SHA}.zip
         
