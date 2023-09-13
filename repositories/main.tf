@@ -25,6 +25,10 @@ resource "github_repository" "module" {
     "kubestack",
     each.key,
   ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "github_branch" "main" {
@@ -32,6 +36,10 @@ resource "github_branch" "main" {
 
   repository = github_repository.module[each.key].name
   branch     = "main"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "github_branch_default" "default" {
@@ -39,6 +47,10 @@ resource "github_branch_default" "default" {
 
   repository = github_repository.module[each.key].name
   branch     = github_branch.main[each.key].branch
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "github_repository_file" "readme" {
@@ -57,4 +69,8 @@ resource "github_repository_file" "readme" {
   commit_author       = "Philipp Strube"
   commit_email        = "pst@kubestack.com"
   overwrite_on_create = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
