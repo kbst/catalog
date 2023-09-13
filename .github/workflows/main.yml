@@ -122,12 +122,10 @@ jobs:
 
     # Apply target kubestack-modules repository
     - run: terraform init
-      with:
-        working-directory: repositories
+      working-directory: repositories
 
     - run: terraform apply --auto-approve
-      with:
-        working-directory: repositories
+      working-directory: repositories
 
     - name: 'Download build-artifacts'
       uses: actions/download-artifact@v3.0.2
