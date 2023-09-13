@@ -138,7 +138,7 @@ jobs:
     # Push artifact content as brach to target repo
     - run: |
         export BRANCH=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
-        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/test-##")
+        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
         export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
 
         echo "branch: ${BRANCH}"
