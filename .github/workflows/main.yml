@@ -138,8 +138,9 @@ jobs:
     # Push artifact content as brach to target repo
     - run: |
         export BRANCH=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
-        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/##")
-        export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
+        export NAMEVERSION=$(echo $GITHUB_REF | sed -e "s#^refs/heads/release-##")
+        #export NAME=$(echo $NAMEVERSION | sed -r 's#-v[0-9]+.*$##')
+        export NAME=$(echo $NAMEVERSION | sed -r 's#-module-repositories##')
 
         echo "branch: ${BRANCH}"
         echo "nameVersion: ${NAMEVERSION}"
@@ -155,6 +156,7 @@ jobs:
         git branch -m "${BRANCH}"
         git remote add target "https://${{ secrets.MODULES_PAT }}@github.com/kubestack-modules/terraform-kustomization-${NAME}.git"
 
+        ls -al ../_dist/
         tar xf ../_dist/module-${NAME}-${GITHUB_SHA}.zip
         
         git add .
