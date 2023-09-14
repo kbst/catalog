@@ -31,7 +31,7 @@ module "example_$module_name" {
     kustomization = kustomization.local
   }
 
-  source  = "kubestack-modules/terraform-kustomization-$name"
+  source  = "kubestack-modules/$name/kustomization"
   version = "v0.0.0-kbst.0"
 
   configuration = {
@@ -97,7 +97,7 @@ module "example_$module_name" {
     kustomization = kustomization.local
   }
 
-  source  = "kubestack-modules/terraform-kustomization-$name"
+  source  = "kubestack-modules/$name/kustomization"
   version = "v0.0.0-kbst.0"
 
   # the configuration here assumes you're using Terraform's default workspace
