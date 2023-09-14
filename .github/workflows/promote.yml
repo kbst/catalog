@@ -72,6 +72,6 @@ jobs:
           await github.rest.git.createRef({
             owner: targetOwner,
             repo: targetRepo,
-            ref: context.ref,
+            ref: targetRef,
             sha: refResp.data.object.sha,
           });
