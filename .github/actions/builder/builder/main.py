@@ -23,7 +23,6 @@ def create_archive(name, version):
             "title": capwords(name),
             "name": name,
             "module_name": name.replace("-", "_"),
-            "version": version,
         })
         tf.close()
         

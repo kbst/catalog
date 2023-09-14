@@ -32,7 +32,7 @@ module "example_$module_name" {
   }
 
   source  = "kubestack-modules/terraform-kustomization-$name"
-  version = "$version"
+  version = "v0.0.0-kbst.0"
 
   configuration = {
     apps = {
@@ -98,7 +98,7 @@ module "example_$module_name" {
   }
 
   source  = "kubestack-modules/terraform-kustomization-$name"
-  version = "$version"
+  version = "v0.0.0-kbst.0"
 
   # the configuration here assumes you're using Terraform's default workspace
   # use `terraform workspace list` to see the workspaces
@@ -116,7 +116,7 @@ module "example_$module_name" {
 
 ## Versions
 
-The module versions are the upstream release version (e.g. `v1.5.9`) plus a packaging suffix (e.g. `-kbst.0`).
+The module versions are the upstream release version (e.g. `v0.0.0`) plus a packaging suffix (e.g. `-kbst.0`).
 Should a new module release be necessary without changing the upstream version, the packaging suffix is incremented by one.
 Due to the packaging suffix, [Terraform version constraints](https://developer.hashicorp.com/terraform/language/expressions/version-constraints) can not be used for Kubestack modules.
 
