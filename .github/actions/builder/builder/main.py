@@ -2,10 +2,11 @@
 
 from json import dumps
 from os import environ, listdir, mkdir
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, dirname
 from shutil import copytree, ignore_patterns, make_archive, rmtree, unpack_archive
 from sys import exit
 from tempfile import TemporaryDirectory
+from string import Template, capwords
 
 
 def create_archive(name, version):
@@ -15,6 +16,20 @@ def create_archive(name, version):
     module = join(DISTDIR, f'module-{name}-{version}')
 
     copytree(src, module_dist, ignore=ignore_patterns('_*'))
+    
+    with open(join(dirname(__file__), 'README.md.tpl'), 'r') as tf:
+        t = Template(tf.read())
+        md = t.substitute({
+            "title": capwords(name),
+            "name": name,
+            "module_name": name.replace("-", "_"),
+            "version": version,
+        })
+        tf.close()
+        
+    with open(join(module_dist, "README.md"), 'w') as f:
+        f.write(md)
+        f.close()
 
     make_archive(module, 'zip', module_dist)
 
@@ -157,6 +172,7 @@ if __name__ == "__main__":
         with open(OUTPUTSFILE, 'a') as f:
             f.write(f'{tf_var_names_output}\n')
             f.write(f'{matrix_output}\n')
+            f.close()
         exit(0)
 
     print(tf_var_names_output)
