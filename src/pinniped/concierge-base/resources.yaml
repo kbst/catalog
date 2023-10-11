@@ -6,7 +6,7 @@ metadata:
   labels:
     app: pinniped-concierge
 data:
-  pinniped.yaml: "discovery:\n  url: null\napi:\n  servingCertificate:\n    durationSeconds: 2592000\n    renewBeforeSeconds: 2160000\napiGroupSuffix: pinniped.dev\n# aggregatedAPIServerPort may be set here, although other YAML references to the default port (10250) may also need to be updated\n# impersonationProxyServerPort may be set here, although other YAML references to the default port (8444) may also need to be updated\nnames:\n  servingCertificateSecret: pinniped-concierge-api-tls-serving-certificate\n  credentialIssuer: pinniped-concierge-config\n  apiService: pinniped-concierge-api\n  impersonationLoadBalancerService: pinniped-concierge-impersonation-proxy-load-balancer\n  impersonationClusterIPService: pinniped-concierge-impersonation-proxy-cluster-ip\n  impersonationTLSCertificateSecret: pinniped-concierge-impersonation-proxy-tls-serving-certificate\n  impersonationCACertificateSecret: pinniped-concierge-impersonation-proxy-ca-certificate\n  impersonationSignerSecret: pinniped-concierge-impersonation-proxy-signer-ca-certificate\n  agentServiceAccount: pinniped-concierge-kube-cert-agent\nlabels: {\"app\":\"pinniped-concierge\"}\nkubeCertAgent:\n  namePrefix: pinniped-concierge-kube-cert-agent-\n  \n  \n  image: projects.registry.vmware.com/pinniped/pinniped-server:v0.23.0@sha256:3549526b0ecc850469a8cfbaf8701876680b522636bd84d573ed80b54552feb2\n  \n  \n  \n\n"
+  pinniped.yaml: "discovery:\n  url: null\napi:\n  servingCertificate:\n    durationSeconds: 2592000\n    renewBeforeSeconds: 2160000\napiGroupSuffix: pinniped.dev\n# aggregatedAPIServerPort may be set here, although other YAML references to the default port (10250) may also need to be updated\n# impersonationProxyServerPort may be set here, although other YAML references to the default port (8444) may also need to be updated\nnames:\n  servingCertificateSecret: pinniped-concierge-api-tls-serving-certificate\n  credentialIssuer: pinniped-concierge-config\n  apiService: pinniped-concierge-api\n  impersonationLoadBalancerService: pinniped-concierge-impersonation-proxy-load-balancer\n  impersonationClusterIPService: pinniped-concierge-impersonation-proxy-cluster-ip\n  impersonationTLSCertificateSecret: pinniped-concierge-impersonation-proxy-tls-serving-certificate\n  impersonationCACertificateSecret: pinniped-concierge-impersonation-proxy-ca-certificate\n  impersonationSignerSecret: pinniped-concierge-impersonation-proxy-signer-ca-certificate\n  agentServiceAccount: pinniped-concierge-kube-cert-agent\nlabels: {\"app\":\"pinniped-concierge\"}\nkubeCertAgent:\n  namePrefix: pinniped-concierge-kube-cert-agent-\n  \n  \n  image: projects.registry.vmware.com/pinniped/pinniped-server:v0.27.0@sha256:8bfe6fe313bf915da228579e48a7f2575aaea0fd9c27385735cb807d701d0131\n  \n  \n  \n\n"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,8 +25,6 @@ spec:
       labels:
         app: pinniped-concierge
         deployment.pinniped.dev: concierge
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
     spec:
       securityContext:
         runAsUser: 65532
@@ -34,7 +32,7 @@ spec:
       serviceAccountName: pinniped-concierge
       containers:
         - name: pinniped-concierge
-          image: projects.registry.vmware.com/pinniped/pinniped-server:v0.23.0@sha256:3549526b0ecc850469a8cfbaf8701876680b522636bd84d573ed80b54552feb2
+          image: projects.registry.vmware.com/pinniped/pinniped-server:v0.27.0@sha256:8bfe6fe313bf915da228579e48a7f2575aaea0fd9c27385735cb807d701d0131
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
@@ -120,6 +118,14 @@ spec:
           effect: NoSchedule
         - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
+        - key: kubernetes.io/arch
+          effect: NoSchedule
+          operator: Equal
+          value: amd64
+        - key: kubernetes.io/arch
+          effect: NoSchedule
+          operator: Equal
+          value: arm64
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
