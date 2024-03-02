@@ -101,6 +101,9 @@ jobs:
   #
   publish-gh:
     runs-on: ubuntu-latest
+    concurrency:
+      group: publish-gh
+      cancel-in-progress: false
     needs: [build, test-k3d, test-terraform]
     if: startsWith(github.ref, 'refs/heads/release-')
 
