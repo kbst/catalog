@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: argocd
 commonAnnotations:
   app.kubernetes.io/managed-by: kubestack
-  app.kubernetes.io/version: v2.6.7
+  app.kubernetes.io/version: v2.10.15
   catalog.kubestack.com/heritage: kubestack.com/catalog/argo-cd
   catalog.kubestack.com/variant: ha
 resources:
