@@ -1,21 +1,22 @@
+locals {
+  # Create a map of sensitive manifests by filtering based on group_kind
+  sensitive_manifests = {
+    for id, manifest in data.kustomization_overlay.current.manifests :
+    id => sensitive(manifest)
+    if(contains(var.sensitive_group_kinds, regex("(?P<group_kind>.*/.*)/.*/.*", id)["group_kind"]))
+  }
+}
+
 resource "kustomization_resource" "p0" {
   for_each = data.kustomization_overlay.current.ids_prio[0]
 
-  manifest = (
-    contains(var.sensitive_group_kinds, regex("(?P<group_kind>.*/.*)/.*/.*", each.value)["group_kind"])
-    ? sensitive(data.kustomization_overlay.current.manifests[each.value])
-    : data.kustomization_overlay.current.manifests[each.value]
-  )
+  manifest = try(local.sensitive_manifests[each.key], data.kustomization_overlay.current.manifests[each.key])
 }
 
 resource "kustomization_resource" "p1" {
   for_each = data.kustomization_overlay.current.ids_prio[1]
 
-  manifest = (
-    contains(var.sensitive_group_kinds, regex("(?P<group_kind>.*/.*)/.*/.*", each.value)["group_kind"])
-    ? sensitive(data.kustomization_overlay.current.manifests[each.value])
-    : data.kustomization_overlay.current.manifests[each.value]
-  )
+  manifest = try(local.sensitive_manifests[each.key], data.kustomization_overlay.current.manifests[each.key])
 
   depends_on = [kustomization_resource.p0]
 }
@@ -23,11 +24,7 @@ resource "kustomization_resource" "p1" {
 resource "kustomization_resource" "p2" {
   for_each = data.kustomization_overlay.current.ids_prio[2]
 
-  manifest = (
-    contains(var.sensitive_group_kinds, regex("(?P<group_kind>.*/.*)/.*/.*", each.value)["group_kind"])
-    ? sensitive(data.kustomization_overlay.current.manifests[each.value])
-    : data.kustomization_overlay.current.manifests[each.value]
-  )
+  manifest = try(local.sensitive_manifests[each.key], data.kustomization_overlay.current.manifests[each.key])
 
   depends_on = [kustomization_resource.p1]
 }
