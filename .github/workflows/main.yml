@@ -23,7 +23,7 @@ jobs:
       matrix: ${{ steps.build.outputs.matrix }}
 
     steps:
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.2.2
 
     # Run builder
     - id: build
@@ -32,7 +32,7 @@ jobs:
 
     # Upload artifacts
     - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v3.1.3
+      uses: actions/upload-artifact@v4.4.3
       with:
         name: _dist
         path: _dist/*.zip
@@ -46,11 +46,11 @@ jobs:
 
     steps:
     # Checkout
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.2.2
 
     # Setup Terraform
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2.0.3
+      uses: hashicorp/setup-terraform@v3.1.2
       with:
         terraform_wrapper: false
         terraform_version: "${{ env.TERRAFORM_VERSION }}"
@@ -73,7 +73,7 @@ jobs:
 
     steps:
     # Checkout
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.2.2
 
     # Setup k3d
     - name: Setup k3d
@@ -86,7 +86,7 @@ jobs:
 
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
         name: _dist
         path: _dist
@@ -116,9 +116,9 @@ jobs:
       id-token: write
 
     steps:
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.2.2
 
-    - uses: google-github-actions/auth@v1.1.1
+    - uses: google-github-actions/auth@v2.1.7
       with:
         workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
         service_account: kbst-catalog-repos-tf@nice-road-159709.iam.gserviceaccount.com
@@ -131,7 +131,7 @@ jobs:
       working-directory: repositories
 
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
         name: _dist
         path: _dist
@@ -173,18 +173,18 @@ jobs:
     steps:
     # Download build artifacts
     - name: 'Download build-artifacts'
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4.1.8
       with:
         name: _dist
         path: _dist
 
     # Upload archive
-    - uses: google-github-actions/auth@v1.1.1
+    - uses: google-github-actions/auth@v2.1.7
       with:
         workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
         service_account: github-actions-catalog-uploade@nice-road-159709.iam.gserviceaccount.com
 
-    - uses: google-github-actions/setup-gcloud@v1.1.1
+    - uses: google-github-actions/setup-gcloud@v2.1.2
 
     - run: gsutil -m cp _dist/*.zip gs://dev.catalog.kubestack.com
 
@@ -202,7 +202,7 @@ jobs:
       actions: write  # required for createWorkflowDispatch
 
     steps:
-    - uses: actions/github-script@v6
+    - uses: actions/github-script@v7.0.1
       with:
         script: |
           const tag = context.ref.replace("refs/heads/release-", "refs/tags/")

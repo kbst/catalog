@@ -19,12 +19,12 @@ jobs:
 
     steps:
     # Setup gcloud CLI
-    - uses: google-github-actions/auth@v1.1.1
+    - uses: google-github-actions/auth@v2.1.7
       with:
         workload_identity_provider: projects/168092815911/locations/global/workloadIdentityPools/oidc/providers/github
         service_account: github-actions-catalog-uploade@nice-road-159709.iam.gserviceaccount.com
 
-    - uses: google-github-actions/setup-gcloud@v1.1.1
+    - uses: google-github-actions/setup-gcloud@v2.1.2
 
     # Promote archive
     - run: |
@@ -51,7 +51,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-    - uses: actions/github-script@v6
+    - uses: actions/github-script@v7.0.1
       with:
         github-token: ${{ secrets.MODULES_PAT }}
         script: |
