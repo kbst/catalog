@@ -31,6 +31,15 @@
 
 </div>
 
+> [!WARNING]
+> **The Kubestack catalog is deprecated.** This repository and the registry at `kbst.xyz`
+> no longer receive updates, and no new catalog module versions are published. The
+> registry at `kbst.xyz` will be shut down on **December 31, 2026**.
+>
+> Do not use the catalog for new platform features. To migrate existing catalog modules
+> to the new platform feature module approach, follow the
+> [migration guide](https://www.kubestack.com/guides/framework-migrate-catalog-to-platform-features/).
+
 ## Introduction
 
 This repository holds the kustomize source manifests and build toolchain for the [Kubestack catalog of Kustomize bases](https://www.kubestack.com/catalog).
@@ -126,4 +135,3 @@ One super simple way to contribute to the success of this project is to give it 
     * Kustomize Terraform Provider - A Kubestack maintained Terraform provider for Kustomize, available in the [Terraform registry](https://registry.terraform.io/providers/kbst/kustomization/latest).
 * [kbst/catalog](https://github.com/kbst/catalog) (this repository)  
     * Catalog of cluster services as Kustomize bases - Continuously tested and updated Kubernetes services, installed and customizable using native Terraform syntax.
-
